@@ -4,7 +4,7 @@ interface EmptyStateProps {
   icon?: ReactNode
   title: string
   description?: string
-  action?: ReactNode
+  action?: { label: string; onClick: () => void }
 }
 
 export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
@@ -19,7 +19,14 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
         <p className="text-base font-medium text-foreground">{title}</p>
         {description && <p className="mt-1 text-sm text-[#8D8D8D]">{description}</p>}
       </div>
-      {action}
+      {action && (
+        <button
+          onClick={action.onClick}
+          className="mt-2 rounded-[4px] bg-[#DB4444] px-8 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
+        >
+          {action.label}
+        </button>
+      )}
     </div>
   )
 }

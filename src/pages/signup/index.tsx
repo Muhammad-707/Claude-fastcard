@@ -12,7 +12,8 @@ import { Footer } from '@/widgets/footer'
 
 const schema = z.object({
   userName: z.string().min(1, 'errors.username_required'),
-  emailOrPhone: z.string().min(1, 'errors.email_required'),
+  email: z.string().email('errors.email_invalid').min(1, 'errors.email_required'),
+  phoneNumber: z.string().min(6, 'errors.phone_required'),
   password: z.string().min(6, 'errors.password_min'),
 })
 type FormValues = z.infer<typeof schema>
@@ -55,15 +56,13 @@ export default function SignUpPage() {
   }, [registerError, t, dispatch])
 
   const onSubmit = async (data: FormValues) => {
-    const isEmail = data.emailOrPhone.includes('@')
-    const payload = {
+    const result = await dispatch(registerThunk({
       userName: data.userName,
-      email: isEmail ? data.emailOrPhone : `${data.userName}@placeholder.com`,
-      phoneNumber: isEmail ? '0000000000' : data.emailOrPhone,
+      email: data.email,
+      phoneNumber: data.phoneNumber,
       password: data.password,
       confirmPassword: data.password,
-    }
-    const result = await dispatch(registerThunk(payload))
+    }))
     if (registerThunk.fulfilled.match(result)) {
       toast.success(t('auth.register_success'))
       navigate('/login', { replace: true })
@@ -95,14 +94,27 @@ export default function SignUpPage() {
 
             <div>
               <input
-                type="text"
-                placeholder={t('auth.email_phone_placeholder')}
+                type="email"
+                placeholder={t('auth.email_label')}
                 autoComplete="email"
-                className={inputCls(!!errors.emailOrPhone)}
-                {...register('emailOrPhone')}
+                className={inputCls(!!errors.email)}
+                {...register('email')}
               />
-              {errors.emailOrPhone && (
-                <p className="mt-1 text-xs text-[#DB4444]">{t('auth.errors.email_required')}</p>
+              {errors.email && (
+                <p className="mt-1 text-xs text-[#DB4444]">{t('auth.errors.email_invalid')}</p>
+              )}
+            </div>
+
+            <div>
+              <input
+                type="tel"
+                placeholder={t('auth.phone')}
+                autoComplete="tel"
+                className={inputCls(!!errors.phoneNumber)}
+                {...register('phoneNumber')}
+              />
+              {errors.phoneNumber && (
+                <p className="mt-1 text-xs text-[#DB4444]">{t('auth.errors.phone_required')}</p>
               )}
             </div>
 

@@ -44,7 +44,7 @@ export default function CartPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
 
-      <main className="mx-auto w-full max-w-[1170px] flex-1 px-4 py-8 xl:px-0">
+      <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 xl:px-0">
         {/* Breadcrumb */}
         <nav className="mb-10 flex items-center gap-2 text-sm text-muted-foreground">
           <Link to="/" className="transition-colors hover:text-foreground">{t('nav.home')}</Link>

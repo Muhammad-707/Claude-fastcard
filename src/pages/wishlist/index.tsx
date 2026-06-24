@@ -174,7 +174,7 @@ export default function WishlistPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
 
-      <main className="mx-auto w-full max-w-[1170px] flex-1 px-4 py-8 xl:px-0">
+      <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 xl:px-0">
 
         {wishlistIds.length === 0 ? (
           <EmptyState

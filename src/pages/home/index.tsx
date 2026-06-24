@@ -71,7 +71,7 @@ export default function HomePage() {
 
       {/* ── Hero banner ── */}
       <section className="border-b border-border">
-        <div className="mx-auto flex max-w-[1170px] flex-col lg:flex-row">
+        <div className="mx-auto flex max-w-[1280px] flex-col lg:flex-row">
           {/* Sidebar categories */}
           <aside className="hidden w-56 shrink-0 border-r border-border py-6 lg:block">
             <ul className="space-y-2.5">
@@ -126,7 +126,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <main className="mx-auto w-full max-w-[1170px] px-4 xl:px-0">
+      <main className="mx-auto w-full max-w-[1280px] px-4 xl:px-0">
 
         {/* ── Flash Sales ── */}
         <section className="mt-14">

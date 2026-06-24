@@ -122,7 +122,7 @@ export default function ProductDetailPage() {
     return (
       <div className="flex min-h-screen flex-col bg-background">
         <Header />
-        <main className="mx-auto w-full max-w-[1170px] flex-1 px-4 py-10 xl:px-0">
+        <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-10 xl:px-0">
           <div className="flex animate-pulse gap-10">
             <div className="flex gap-3">
               <div className="flex flex-col gap-3">
@@ -165,7 +165,7 @@ export default function ProductDetailPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
 
-      <main className="mx-auto w-full max-w-[1170px] flex-1 px-4 py-8 xl:px-0">
+      <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 xl:px-0">
         {/* Breadcrumb */}
         <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
           <Link to="/" className="hover:text-foreground transition-colors">{t('nav.home')}</Link>

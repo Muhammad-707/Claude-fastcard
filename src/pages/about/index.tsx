@@ -73,7 +73,7 @@ export default function AboutPage() {
 
       <main className="flex-1">
         {/* ── Breadcrumb ── */}
-        <div className="mx-auto w-full max-w-[1170px] px-4 py-5 xl:px-0">
+        <div className="mx-auto w-full max-w-[1280px] px-4 py-5 xl:px-0">
           <nav className="flex items-center gap-2 text-sm text-[#8D8D8D]">
             <Link to="/" className="transition-colors hover:text-foreground">
               {t('nav.home')}
@@ -84,7 +84,7 @@ export default function AboutPage() {
         </div>
 
         {/* ── Hero ── */}
-        <section className="mx-auto max-w-[1170px] px-4 py-10 xl:px-0">
+        <section className="mx-auto max-w-[1280px] px-4 py-10 xl:px-0">
           <div className="flex flex-col-reverse items-center gap-10 lg:flex-row">
             <div className="flex-1">
               <h1 className="text-4xl font-semibold text-foreground lg:text-5xl">
@@ -115,7 +115,7 @@ export default function AboutPage() {
         </section>
 
         {/* ── Stats ── */}
-        <section className="mx-auto max-w-[1170px] px-4 py-12 xl:px-0">
+        <section className="mx-auto max-w-[1280px] px-4 py-12 xl:px-0">
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             {STATS.map((s, i) => (
               <div
@@ -135,7 +135,7 @@ export default function AboutPage() {
         </section>
 
         {/* ── Team ── */}
-        <section className="mx-auto max-w-[1170px] px-4 py-12 xl:px-0">
+        <section className="mx-auto max-w-[1280px] px-4 py-12 xl:px-0">
           <h2 className="mb-10 text-center text-2xl font-semibold text-foreground">
             {t('about.team_title')}
           </h2>
@@ -192,7 +192,7 @@ export default function AboutPage() {
         </section>
 
         {/* ── Services ── */}
-        <section className="mx-auto max-w-[1170px] px-4 py-12 xl:px-0">
+        <section className="mx-auto max-w-[1280px] px-4 py-12 xl:px-0">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
             {SERVICES.map((s) => (
               <div key={s.key} className="flex flex-col items-center gap-3 text-center">

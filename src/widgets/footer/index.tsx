@@ -42,7 +42,7 @@ export function Footer() {
 
   return (
     <footer className="bg-black text-white">
-      <div className="mx-auto max-w-[1170px] px-4 py-14 xl:px-0">
+      <div className="mx-auto max-w-[1280px] px-4 py-14 xl:px-0">
         {/* ── 5-column grid (desktop) ── */}
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5 lg:gap-8">
 

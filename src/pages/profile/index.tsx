@@ -128,7 +128,7 @@ export default function ProfilePage() {
 
       <main className="flex-1">
         {/* Breadcrumb */}
-        <div className="mx-auto w-full max-w-[1170px] px-4 py-5 xl:px-0">
+        <div className="mx-auto w-full max-w-[1280px] px-4 py-5 xl:px-0">
           <nav className="flex items-center gap-2 text-sm text-muted-foreground">
             <Link to="/" className="transition-colors hover:text-foreground">{t('nav.home')}</Link>
             <span>/</span>
@@ -136,7 +136,7 @@ export default function ProfilePage() {
           </nav>
         </div>
 
-        <div className="mx-auto max-w-[1170px] px-4 pb-16 xl:px-0">
+        <div className="mx-auto max-w-[1280px] px-4 pb-16 xl:px-0">
           <div className="flex flex-col gap-10 lg:flex-row">
 
             {/* ── Sidebar (text-only, no icons) ── */}

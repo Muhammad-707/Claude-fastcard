@@ -121,7 +121,7 @@ export function Header() {
     <>
       <header className="border-b border-border bg-background">
         {/* ── Desktop ── */}
-        <div className="mx-auto hidden max-w-[1170px] items-center justify-between px-4 py-4 xl:px-0 lg:flex">
+        <div className="mx-auto hidden max-w-[1280px] items-center justify-between px-4 py-4 xl:px-0 lg:flex">
           <FastCartLogo />
 
           <nav className="flex items-center gap-8">
