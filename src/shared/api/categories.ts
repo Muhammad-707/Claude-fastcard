@@ -1,4 +1,4 @@
-import { api } from './axios'
+import api from './axios'
 import type { ApiEnvelope, Category } from './types'
 
 export const categoriesApi = {
