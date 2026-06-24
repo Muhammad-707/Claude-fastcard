@@ -269,16 +269,19 @@ VITE_DEFAULT_LANG=ru
 ---
 
 ## 📍 Последний чекпоинт
-- **Текущий статус**: Все страницы реализованы и работают. Критические баги исправлены. Сборка проходит чисто.
-- **Что сделано в этой сессии**:
-  1. EmptyState: исправлен краш "Objects are not valid as a React child" — action теперь `{label, onClick}` + рендерится как `<button>`
-  2. SignUp: добавлены отдельные поля email + phone (вместо fake-значений), POST /Account/register теперь работает
-  3. Layout: max-w-[1170px] → max-w-[1280px] на всех страницах и виджетах
-  4. ProductCard: image h-[260px] → h-[280px], badge color исправлен на #DB4444
-  5. Wishlist/ProductDetail: исправлены ссылки `/products/:id` → `/product/:id`
-  6. Header: добавлен announcement bar (чёрная полоса со скидкой)
-  7. Главная: категорийный сайдбар с hover-flyout для подкатегорий
-  8. Products: сайдбар показывает подкатегории активной категории, subcategoryId в URL
-  9. Login: FloatingInput обёрнут в forwardRef для совместимости с react-hook-form
-  10. Breadcrumb на /products: Home / Products / Category / Subcategory
-- **Следующий шаг**: Улучшить Home Page — добавить автоматический слайдер hero (Swiper или CSS), улучшить карточки flash sales с реальными данными из API, добавить "New Arrivals" секцию с реальными изображениями. Также можно улучшить Profile страницу с загрузкой аватара.
+- **Текущий статус**: Все задачи из super-prompt выполнены. TypeScript 0 ошибок. Build clean. Pushed to main.
+- **Что сделано в последней сессии**:
+  1. **CRITICAL FIX**: ProductCard — убрал вложенный `<Link>` внутри `<Link>` (hydration error "a cannot descend a"). Теперь вся карточка — `<div onClick>` с отдельными `<button>` для wishlist и quick view.
+  2. **API FIX**: Обнаружил, что API возвращает `data.products` (не `data.data`). Исправлен `extractList()` в productsSlice. Карточки товаров теперь отображаются.
+  3. **API FIX**: Поле изображения в списке — `product.image` (string), в детали — `images[i].images` (не imageName). Исправлено везде.
+  4. **Header**: `fixed top-0 z-50` + glassmorphism `bg-white/80 backdrop-blur-md`. Spacer div автоматически отодвигает контент.
+  5. **Header**: Новый логотип (cart icon + "Exclusive"). Порядок: Search | ThemeToggle | LangSwitcher | Wishlist | Cart | User.
+  6. **Header**: "Sign Up" в навигации скрывается когда пользователь авторизован.
+  7. **Header**: User modal — показывает первую букву имени в красном кружке, пункты Account / My Orders / Logout.
+  8. **Signup**: Добавлено поле подтверждения пароля + strong validation. После регистрации — success screen (API не имеет confirm-code endpoint).
+  9. **Home**: SectionLabel с красной полосой (h-8 w-[14px] bg-[#DB4444]). Все заголовки секций text-4xl font-bold.
+  10. **Home**: Flash Sales / Best Selling / Explore — Swiper горизонтальная карусель с кнопками prev/next.
+  11. **Home**: "Enhance Your Music" — изображение на весь правый блок, текст слева.
+  12. **Home**: New Arrival — PS5 h-[550px], Women h-[250px], Speakers/Perfume h-[248px].
+  13. **Footer**: Обновлён стиль, subscribe с feedback, иконки соцсетей.
+- **Следующий шаг**: Проект готов к презентации. Можно улучшить: загрузку аватара в Profile, wishlist синхронизацию с API (сейчас localStorage), добавить страницы /orders в Profile.
