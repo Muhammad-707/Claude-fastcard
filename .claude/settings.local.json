@@ -9,5 +9,9 @@
       "Bash(npx create-vite@latest exam3-fastcard-temp --template react-ts)",
       "Skill(update-config)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "Framelink Figma MCP"
+  ],
+  "enableAllProjectMcpServers": true
 }

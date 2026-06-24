@@ -4,6 +4,9 @@ import { Search, Heart, ShoppingCart, Menu, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { LangSwitcher } from '@/features/lang-switcher'
 import { ThemeToggle } from '@/features/theme-toggle'
+import { useAppSelector } from '@/app/hooks'
+import { selectCartCount } from '@/features/cart/model/cartSlice'
+import { selectWishlistIds } from '@/features/wishlist/model/wishlistSlice'
 
 const NAV_LINKS = [
   { key: 'nav.home', to: '/' },
@@ -15,6 +18,8 @@ const NAV_LINKS = [
 export function Header() {
   const { t } = useTranslation()
   const [menuOpen, setMenuOpen] = useState(false)
+  const cartCount = useAppSelector(selectCartCount)
+  const wishlistIds = useAppSelector(selectWishlistIds)
 
   return (
     <>
@@ -94,10 +99,15 @@ export function Header() {
               {/* Wishlist */}
               <Link
                 to="/wishlist"
-                className="p-1 text-foreground transition-colors hover:text-primary"
+                className="relative p-1 text-foreground transition-colors hover:text-primary"
                 aria-label="Wishlist"
               >
                 <Heart className="h-5 w-5" />
+                {wishlistIds.length > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-white">
+                    {wishlistIds.length}
+                  </span>
+                )}
               </Link>
 
               {/* Cart */}
@@ -107,6 +117,11 @@ export function Header() {
                 aria-label="Cart"
               >
                 <ShoppingCart className="h-5 w-5" />
+                {cartCount > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-white">
+                    {cartCount}
+                  </span>
+                )}
               </Link>
 
               {/* Divider */}

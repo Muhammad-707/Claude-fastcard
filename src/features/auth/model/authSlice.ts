@@ -132,3 +132,8 @@ const authSlice = createSlice({
 
 export const { logout, clearLoginError, clearRegisterError } = authSlice.actions
 export default authSlice.reducer
+
+export const selectIsAuth = (s: { auth: AuthState }) => !!s.auth.token
+export const selectIsAdmin = (s: { auth: AuthState }) =>
+  s.auth.user?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] === 'Admin'
+export const selectUserId = (s: { auth: AuthState }) => s.auth.user?.sid ?? null

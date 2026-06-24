@@ -1,92 +1,79 @@
-import { lazy, Suspense, type ReactNode } from 'react'
-import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom'
+import { lazy, Suspense } from 'react'
+import { BrowserRouter, Navigate, Routes, Route, Outlet, useLocation } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { ThemeProvider } from 'next-themes'
 import { Toaster } from 'sonner'
 import { store } from '@/app/store'
-import { useAppSelector, useAppDispatch } from '@/app/hooks'
-import { logout } from '@/features/auth/model/authSlice'
+import { useAppSelector } from '@/app/hooks'
+import { selectIsAuth, selectIsAdmin } from '@/features/auth/model/authSlice'
+import { ErrorBoundary } from '@/shared/ui/error-boundary'
+import { PageLoader } from '@/shared/ui/page-loader'
 import '@/i18n'
 
-const SignUpPage = lazy(() => import('@/pages/signup'))
-const LoginPage = lazy(() => import('@/pages/login'))
-const NotFoundPage = lazy(() => import('@/pages/not-found'))
+const SignUpPage      = lazy(() => import('@/pages/signup'))
+const LoginPage       = lazy(() => import('@/pages/login'))
+const HomePage        = lazy(() => import('@/pages/home'))
+const ProductsPage    = lazy(() => import('@/pages/product-list'))
+const ProductDetail   = lazy(() => import('@/pages/product-detail'))
+const CartPage        = lazy(() => import('@/pages/cart'))
+const WishlistPage    = lazy(() => import('@/pages/wishlist'))
+const CheckoutPage    = lazy(() => import('@/pages/checkout'))
+const ProfilePage     = lazy(() => import('@/pages/profile'))
+const AboutPage       = lazy(() => import('@/pages/about'))
+const ContactPage     = lazy(() => import('@/pages/contact'))
+const NotFoundPage    = lazy(() => import('@/pages/not-found'))
 
-function PageLoader() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-    </div>
-  )
+function GuestOnly() {
+  const isAuth = useAppSelector(selectIsAuth)
+  return isAuth ? <Navigate to="/" replace /> : <Outlet />
 }
 
-function GuestOnly({ children }: { children: ReactNode }) {
-  const token = useAppSelector((s) => s.auth.token)
-  if (token) return <Navigate to="/" replace />
-  return <>{children}</>
+function RequireAuth() {
+  const isAuth = useAppSelector(selectIsAuth)
+  const location = useLocation()
+  return isAuth ? <Outlet /> : <Navigate to="/login" state={{ from: location }} replace />
 }
 
-function RequireAuth({ children }: { children: ReactNode }) {
-  const token = useAppSelector((s) => s.auth.token)
-  if (!token) return <Navigate to="/signup" replace />
-  return <>{children}</>
+function RequireAdmin() {
+  const isAdmin = useAppSelector(selectIsAdmin)
+  return isAdmin ? <Outlet /> : <Navigate to="/" replace />
 }
-
-function HomePlaceholder() {
-  const user = useAppSelector((s) => s.auth.user)
-  const dispatch = useAppDispatch()
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background text-foreground">
-      <h1 className="text-2xl font-bold">Welcome, {user?.name ?? 'User'}!</h1>
-      <p className="text-muted-foreground">Home page coming soon.</p>
-      <button
-        onClick={() => dispatch(logout())}
-        className="rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 transition-colors"
-      >
-        Logout
-      </button>
-    </div>
-  )
-}
+void RequireAdmin // for future admin routes
 
 export default function App() {
   return (
     <Provider store={store}>
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
         <BrowserRouter>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              {/* Guest-only */}
-              <Route
-                path="/signup"
-                element={
-                  <GuestOnly>
-                    <SignUpPage />
-                  </GuestOnly>
-                }
-              />
-              <Route
-                path="/login"
-                element={
-                  <GuestOnly>
-                    <LoginPage />
-                  </GuestOnly>
-                }
-              />
+          <ErrorBoundary>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                {/* Guest-only */}
+                <Route element={<GuestOnly />}>
+                  <Route path="/signup" element={<SignUpPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                </Route>
 
-              {/* Protected home */}
-              <Route
-                path="/"
-                element={
-                  <RequireAuth>
-                    <HomePlaceholder />
-                  </RequireAuth>
-                }
-              />
-              {/* 404 — accessible to everyone */}
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
+                {/* Public */}
+                <Route path="/" element={<HomePage />} />
+                <Route path="/products" element={<ProductsPage />} />
+                <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+
+                {/* Protected */}
+                <Route element={<RequireAuth />}>
+                  <Route path="/cart" element={<CartPage />} />
+                  <Route path="/wishlist" element={<WishlistPage />} />
+                  <Route path="/checkout" element={<CheckoutPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                </Route>
+
+                {/* 404 */}
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </Suspense>
+          </ErrorBoundary>
           <Toaster richColors position="top-right" />
         </BrowserRouter>
       </ThemeProvider>
