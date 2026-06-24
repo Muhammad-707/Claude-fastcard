@@ -49,40 +49,47 @@ export const fetchProductById = createAsyncThunk(
 )
 
 function extractList(raw: unknown): { list: Product[]; pagination: ProductsState['pagination'] } {
-  if (!raw || typeof raw !== 'object') return { list: [], pagination: { pageNumber: 1, pageSize: 12, totalPage: 1, totalRecord: 0 } }
+  const empty = { list: [] as Product[], pagination: { pageNumber: 1, pageSize: 12, totalPage: 1, totalRecord: 0 } }
+  if (!raw || typeof raw !== 'object') return empty
 
   const r = raw as Record<string, unknown>
 
-  // Direct paginated: { data: Product[], pageNumber, pageSize, totalPage, totalRecord }
-  if (Array.isArray(r['data'])) {
-    return {
-      list: r['data'] as Product[],
-      pagination: {
-        pageNumber: Number(r['pageNumber'] ?? 1),
-        pageSize: Number(r['pageSize'] ?? 12),
-        totalPage: Number(r['totalPage'] ?? 1),
-        totalRecord: Number(r['totalRecord'] ?? 0),
-      },
-    }
+  const pagination = {
+    pageNumber: Number(r['pageNumber'] ?? 1),
+    pageSize: Number(r['pageSize'] ?? 12),
+    totalPage: Number(r['totalPage'] ?? 1),
+    totalRecord: Number(r['totalRecord'] ?? 0),
   }
 
-  // Envelope-wrapped: { data: { data: Product[], pageNumber, ... } }
+  // Direct array at root data: { data: Product[], pageNumber, ... }
+  if (Array.isArray(r['data'])) {
+    return { list: r['data'] as Product[], pagination }
+  }
+
+  // Nested object: { data: { products: [...], ... } } — ACTUAL API FORMAT
   if (r['data'] && typeof r['data'] === 'object' && !Array.isArray(r['data'])) {
     const inner = r['data'] as Record<string, unknown>
+
+    // { data: { products: [...] } }
+    if (Array.isArray(inner['products'])) {
+      return { list: inner['products'] as Product[], pagination }
+    }
+
+    // { data: { data: [...] } }
     if (Array.isArray(inner['data'])) {
       return {
         list: inner['data'] as Product[],
         pagination: {
-          pageNumber: Number(inner['pageNumber'] ?? r['pageNumber'] ?? 1),
-          pageSize: Number(inner['pageSize'] ?? r['pageSize'] ?? 12),
-          totalPage: Number(inner['totalPage'] ?? r['totalPage'] ?? 1),
-          totalRecord: Number(inner['totalRecord'] ?? r['totalRecord'] ?? 0),
+          pageNumber: Number(inner['pageNumber'] ?? pagination.pageNumber),
+          pageSize: Number(inner['pageSize'] ?? pagination.pageSize),
+          totalPage: Number(inner['totalPage'] ?? pagination.totalPage),
+          totalRecord: Number(inner['totalRecord'] ?? pagination.totalRecord),
         },
       }
     }
   }
 
-  return { list: [], pagination: { pageNumber: 1, pageSize: 12, totalPage: 1, totalRecord: 0 } }
+  return empty
 }
 
 const productsSlice = createSlice({

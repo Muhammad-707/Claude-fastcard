@@ -21,7 +21,7 @@ export function ProductCard({ product, showBadge }: ProductCardProps) {
   const wishlisted = useAppSelector(selectIsWishlisted(product.id))
 
   const price = product.hasDiscount ? product.discountPrice ?? product.price : product.price
-  const image = product.images?.[0]?.imageName
+  const image = product.image ?? product.images?.[0]?.images ?? product.images?.[0]?.imageName
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -40,7 +40,7 @@ export function ProductCard({ product, showBadge }: ProductCardProps) {
     : null
 
   return (
-    <Link to={`/product/${product.id}`} className="group block">
+    <Link to={`/product/${product.id}`} className="group block transition-transform duration-300 hover:-translate-y-1">
       {/* Image */}
       <div className="relative overflow-hidden rounded-[4px] bg-[#F5F5F5]">
         <img

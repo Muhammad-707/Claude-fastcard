@@ -23,24 +23,30 @@ export interface Category {
   categoryImage: string
   subCategories: SubCategory[]
 }
-export interface ProductImage { id: number; imageName: string }
+export interface ProductImage { id: number; images: string; imageName?: string }
 export interface Product {
   id: number
   productName: string
-  description: string
+  description?: string
   price: number
   hasDiscount: boolean
   discountPrice?: number
   quantity: number
-  code: string
+  code?: string
   weight?: string
   size?: string
-  brandId: number
+  brandId?: number
   brandName?: string
-  colorId: number
+  colorId?: number
   colorName?: string
-  subCategoryId: number
-  images: ProductImage[]
+  color?: string
+  subCategoryId?: number
+  categoryId?: number
+  categoryName?: string
+  image?: string
+  images?: ProductImage[]
+  productInMyCart?: boolean
+  productInfoFromCart?: unknown
 }
 export interface CartItem {
   productId: number

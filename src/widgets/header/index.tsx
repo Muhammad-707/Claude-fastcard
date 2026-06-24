@@ -119,30 +119,22 @@ export function Header() {
 
   return (
     <>
-      {/* ── Announcement bar ── */}
-      <div className="hidden bg-black py-3 text-center text-xs font-medium text-white sm:block">
-        Summer Sale For All Swim Suits And Free Express Delivery - OFF 50%!{' '}
-        <Link to="/products" className="font-bold underline underline-offset-2 hover:text-[#DB4444] transition-colors">
-          ShopNow
-        </Link>
-      </div>
-
-      <header className="border-b border-border bg-background">
+      <header className="sticky top-0 z-50 border-b border-gray-200/50 bg-white/70 backdrop-blur-md dark:border-white/10 dark:bg-black/70">
         {/* ── Desktop ── */}
         <div className="mx-auto hidden max-w-[1280px] items-center justify-between px-4 py-4 xl:px-0 lg:flex">
           <FastCartLogo />
 
-          <nav className="flex items-center gap-8">
+          <nav className="flex items-center gap-10">
             {NAV_LINKS.map((link) => (
               <NavLink
                 key={link.key}
                 to={link.to}
                 end={link.to === '/'}
                 className={({ isActive }) =>
-                  `text-sm transition-colors ${
+                  `text-base font-medium transition-colors ${
                     isActive
-                      ? 'border-b-2 border-foreground pb-0.5 text-foreground font-medium'
-                      : 'text-foreground hover:border-b-2 hover:border-foreground hover:pb-0.5'
+                      ? 'border-b-2 border-foreground pb-0.5 text-foreground'
+                      : 'text-foreground/80 hover:text-foreground hover:border-b-2 hover:border-foreground hover:pb-0.5'
                   }`
                 }
               >

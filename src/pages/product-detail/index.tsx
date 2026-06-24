@@ -23,7 +23,7 @@ function RelatedCard({ product }: { product: Product }) {
   const isAuth = useAppSelector(selectIsAuth)
   const isWishlisted = useAppSelector(selectIsWishlisted(product.id))
   const price = product.hasDiscount ? product.discountPrice ?? product.price : product.price
-  const img = product.images?.[0]?.imageName
+  const img = product.image ?? product.images?.[0]?.images ?? product.images?.[0]?.imageName
   const discountPct = product.hasDiscount && product.discountPrice
     ? Math.round((1 - product.discountPrice / product.price) * 100)
     : null
@@ -191,7 +191,7 @@ export default function ProductDetailPage() {
                       selectedImg === i ? 'ring-2 ring-foreground' : 'hover:ring-1 hover:ring-border'
                     }`}
                   >
-                    <img src={getImageUrl(img.imageName)} alt={product.productName} className="h-full w-full object-cover" />
+                    <img src={getImageUrl(img.images ?? img.imageName)} alt={product.productName} className="h-full w-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -200,7 +200,7 @@ export default function ProductDetailPage() {
             {/* Main image */}
             <div className="relative overflow-hidden rounded-[4px] bg-muted">
               <img
-                src={getImageUrl(images[selectedImg]?.imageName)}
+                src={product.image ? getImageUrl(product.image) : getImageUrl(images[selectedImg]?.images ?? images[selectedImg]?.imageName)}
                 alt={product.productName}
                 className="h-[400px] w-[400px] max-w-[min(100vw-2rem,400px)] object-cover object-center lg:h-[500px] lg:w-[500px]"
               />
