@@ -42,8 +42,8 @@ export default function WishlistPage() {
 
       <main className="mx-auto w-full max-w-[1170px] flex-1 px-4 py-8 xl:px-0">
         {/* Breadcrumb */}
-        <nav className="mb-8 flex items-center gap-2 text-sm text-[#8D8D8D]">
-          <Link to="/" className="hover:text-primary transition-colors">Home</Link>
+        <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
+          <Link to="/" className="hover:text-[#DB4444] transition-colors">{t('nav.home')}</Link>
           <ChevronRight className="h-3.5 w-3.5" />
           <span className="text-foreground">{t('wishlist.title')}</span>
         </nav>

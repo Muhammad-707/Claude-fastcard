@@ -72,11 +72,10 @@ export interface RegisterDto {
   confirmPassword: string
 }
 
+// Matches Swagger: ProductName, MinPrice, MaxPrice, BrandId, ColorId, CategoryId, SubcategoryId, PageNumber, PageSize
 export interface ProductFilters {
   userId?: string
   productName?: string
-  search?: string
-  sort?: string
   minPrice?: number
   maxPrice?: number
   brandId?: number
