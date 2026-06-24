@@ -269,5 +269,16 @@ VITE_DEFAULT_LANG=ru
 ---
 
 ## 📍 Последний чекпоинт
-- **Текущий статус**: Проект инициализирован. Готов к старту разработки.
-- **Следующий шаг**: Начать Этап 1 (Исправление авторизации Login/SignUp и страницы 404) по макетам из Figma.
+- **Текущий статус**: Все страницы реализованы и работают. Критические баги исправлены. Сборка проходит чисто.
+- **Что сделано в этой сессии**:
+  1. EmptyState: исправлен краш "Objects are not valid as a React child" — action теперь `{label, onClick}` + рендерится как `<button>`
+  2. SignUp: добавлены отдельные поля email + phone (вместо fake-значений), POST /Account/register теперь работает
+  3. Layout: max-w-[1170px] → max-w-[1280px] на всех страницах и виджетах
+  4. ProductCard: image h-[260px] → h-[280px], badge color исправлен на #DB4444
+  5. Wishlist/ProductDetail: исправлены ссылки `/products/:id` → `/product/:id`
+  6. Header: добавлен announcement bar (чёрная полоса со скидкой)
+  7. Главная: категорийный сайдбар с hover-flyout для подкатегорий
+  8. Products: сайдбар показывает подкатегории активной категории, subcategoryId в URL
+  9. Login: FloatingInput обёрнут в forwardRef для совместимости с react-hook-form
+  10. Breadcrumb на /products: Home / Products / Category / Subcategory
+- **Следующий шаг**: Улучшить Home Page — добавить автоматический слайдер hero (Swiper или CSS), улучшить карточки flash sales с реальными данными из API, добавить "New Arrivals" секцию с реальными изображениями. Также можно улучшить Profile страницу с загрузкой аватара.
