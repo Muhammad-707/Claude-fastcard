@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Trash2, ChevronRight, Minus, Plus } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import {
   fetchCart,
@@ -26,17 +25,17 @@ export default function CartPage() {
   const total = useAppSelector(selectCartTotal)
   const [confirmClear, setConfirmClear] = useState(false)
   const [confirmRemoveId, setConfirmRemoveId] = useState<number | null>(null)
+  const [coupon, setCoupon] = useState('')
 
   useEffect(() => { dispatch(fetchCart()) }, [dispatch])
 
-  const handleClear = () => {
-    dispatch(clearCart())
-    setConfirmClear(false)
-  }
+  const handleClear = () => { dispatch(clearCart()); setConfirmClear(false) }
+  const handleRemove = (productId: number) => { dispatch(removeFromCart(productId)); setConfirmRemoveId(null) }
 
-  const handleRemove = (productId: number) => {
-    dispatch(removeFromCart(productId))
-    setConfirmRemoveId(null)
+  const handleQtyChange = (productId: number, newQty: number, currentQty: number) => {
+    if (newQty < 1) return
+    if (newQty > currentQty) dispatch(increaseCart(productId))
+    else dispatch(reduceCart(productId))
   }
 
   const safeItems = Array.isArray(items) ? items : []
@@ -47,18 +46,18 @@ export default function CartPage() {
 
       <main className="mx-auto w-full max-w-[1170px] flex-1 px-4 py-8 xl:px-0">
         {/* Breadcrumb */}
-        <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-[#DB4444] transition-colors">{t('nav.home')}</Link>
-          <ChevronRight className="h-3.5 w-3.5" />
+        <nav className="mb-10 flex items-center gap-2 text-sm text-muted-foreground">
+          <Link to="/" className="transition-colors hover:text-foreground">{t('nav.home')}</Link>
+          <span>/</span>
           <span className="text-foreground">{t('cart.title')}</span>
         </nav>
 
         {status === 'loading' && (
-          <div className="animate-pulse space-y-4">
+          <div className="animate-pulse space-y-3">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex gap-4 rounded-[4px] bg-muted p-4">
-                <div className="h-20 w-20 rounded bg-muted-foreground/20" />
-                <div className="flex-1 space-y-2">
+                <div className="h-[70px] w-[70px] rounded bg-muted-foreground/20" />
+                <div className="flex-1 space-y-2 pt-1">
                   <div className="h-4 w-3/4 rounded bg-muted-foreground/20" />
                   <div className="h-3 w-1/2 rounded bg-muted-foreground/20" />
                 </div>
@@ -78,19 +77,20 @@ export default function CartPage() {
         )}
 
         {status === 'success' && safeItems.length > 0 && (
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-            {/* ── Cart items ── */}
-            <div className="flex-1">
+          <>
+            {/* ── Table ── */}
+            <div className="rounded-[4px] shadow-sm">
               {/* Table header */}
-              <div className="hidden grid-cols-[2fr_1fr_1fr_1fr_auto] items-center gap-4 rounded-t-[4px] bg-background px-4 py-3 shadow-sm sm:grid">
-                <span className="text-sm font-medium text-foreground">Product</span>
-                <span className="text-center text-sm font-medium text-foreground">Price</span>
-                <span className="text-center text-sm font-medium text-foreground">Quantity</span>
-                <span className="text-center text-sm font-medium text-foreground">Subtotal</span>
+              <div className="hidden grid-cols-[2fr_1fr_1fr_1fr_40px] items-center gap-4 rounded-[4px] bg-background px-6 py-4 shadow-sm sm:grid">
+                <span className="text-sm font-medium text-foreground">{t('cart.col_product')}</span>
+                <span className="text-center text-sm font-medium text-foreground">{t('cart.col_price')}</span>
+                <span className="text-center text-sm font-medium text-foreground">{t('cart.col_quantity')}</span>
+                <span className="text-center text-sm font-medium text-foreground">{t('cart.col_subtotal')}</span>
                 <span />
               </div>
 
-              <div className="mt-2 space-y-2">
+              {/* Rows */}
+              <div className="mt-3 space-y-3">
                 {safeItems.map((item) => {
                   const price = item.product.hasDiscount
                     ? item.product.discountPrice ?? item.product.price
@@ -101,44 +101,36 @@ export default function CartPage() {
                   return (
                     <div
                       key={item.productId}
-                      className="grid grid-cols-[auto_1fr] items-center gap-4 rounded-[4px] border border-border bg-background px-4 py-4 shadow-sm sm:grid-cols-[2fr_1fr_1fr_1fr_auto]"
+                      className="grid grid-cols-[auto_1fr] items-center gap-4 rounded-[4px] bg-background px-6 py-5 shadow-sm sm:grid-cols-[2fr_1fr_1fr_1fr_40px]"
                     >
                       {/* Product */}
-                      <div className="col-span-1 flex items-center gap-4">
-                        <div className="h-[60px] w-[60px] shrink-0 overflow-hidden rounded-[4px] bg-muted">
+                      <div className="flex items-center gap-4">
+                        <div className="h-[70px] w-[70px] shrink-0 overflow-hidden rounded-[4px] bg-muted">
                           <img
                             src={getImageUrl(img)}
                             alt={item.product.productName}
                             className="h-full w-full object-cover"
                           />
                         </div>
-                        <p className="line-clamp-2 text-sm font-medium text-foreground">
+                        <p className="line-clamp-2 text-sm text-foreground">
                           {item.product.productName}
                         </p>
                       </div>
 
                       {/* Price */}
                       <div className="hidden text-center sm:block">
-                        <span className="text-sm text-foreground">${price}</span>
+                        <span className="text-sm text-foreground">${price.toFixed(2)}</span>
                       </div>
 
-                      {/* Quantity */}
+                      {/* Quantity — spinner input */}
                       <div className="flex items-center justify-center">
-                        <div className="flex items-center rounded-[4px] border border-border">
-                          <button
-                            onClick={() => dispatch(reduceCart(item.productId))}
-                            className="flex h-8 w-8 items-center justify-center text-foreground hover:bg-muted transition-colors"
-                          >
-                            <Minus className="h-3.5 w-3.5" />
-                          </button>
-                          <span className="w-8 text-center text-sm">{item.quantity}</span>
-                          <button
-                            onClick={() => dispatch(increaseCart(item.productId))}
-                            className="flex h-8 w-8 items-center justify-center text-foreground hover:bg-muted transition-colors"
-                          >
-                            <Plus className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
+                        <input
+                          type="number"
+                          min={1}
+                          value={item.quantity}
+                          onChange={(e) => handleQtyChange(item.productId, Number(e.target.value), item.quantity)}
+                          className="w-[72px] rounded-[4px] border border-border bg-background py-1.5 text-center text-sm text-foreground outline-none focus:border-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-auto [&::-webkit-inner-spin-button]:appearance-auto"
+                        />
                       </div>
 
                       {/* Subtotal */}
@@ -146,78 +138,89 @@ export default function CartPage() {
                         <span className="text-sm font-medium text-foreground">${subtotal.toFixed(2)}</span>
                       </div>
 
-                      {/* Remove */}
-                      <button
-                        onClick={() => setConfirmRemoveId(item.productId)}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:text-[#DB4444] transition-colors"
-                        aria-label={t('cart.remove')}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      {/* Remove — red filled circle × */}
+                      <div className="flex justify-end sm:justify-center">
+                        <button
+                          onClick={() => setConfirmRemoveId(item.productId)}
+                          className="flex h-7 w-7 items-center justify-center rounded-full bg-[#DB4444] text-white hover:opacity-90 transition-opacity"
+                          aria-label={t('cart.remove')}
+                        >
+                          <span className="text-base font-medium leading-none">×</span>
+                        </button>
+                      </div>
                     </div>
                   )
                 })}
               </div>
+            </div>
 
-              {/* Actions */}
-              <div className="mt-4 flex justify-between">
-                <Link
-                  to="/products"
-                  className="rounded-[4px] border border-border px-6 py-2 text-sm font-medium text-foreground hover:border-[#DB4444] hover:text-[#DB4444] transition-colors"
+            {/* ── Actions row ── */}
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+              <Link
+                to="/products"
+                className="rounded-[4px] border border-border px-8 py-3 text-sm font-medium text-foreground transition-colors hover:border-foreground"
+              >
+                {t('cart.return_to_shop')}
+              </Link>
+              <div className="flex gap-3">
+                <button
+                  className="rounded-[4px] border border-border px-8 py-3 text-sm font-medium text-foreground transition-colors hover:border-foreground"
                 >
-                  {t('cart.continue_shopping')}
-                </Link>
+                  {t('cart.update_cart')}
+                </button>
                 <button
                   onClick={() => setConfirmClear(true)}
-                  className="rounded-[4px] border border-border px-6 py-2 text-sm font-medium text-foreground hover:border-[#DB4444] hover:text-[#DB4444] transition-colors"
+                  className="rounded-[4px] border border-[#DB4444] px-8 py-3 text-sm font-medium text-[#DB4444] transition-colors hover:bg-[#DB4444] hover:text-white"
                 >
-                  {t('cart.clear_cart')}
+                  {t('cart.remove_all')}
                 </button>
               </div>
             </div>
 
-            {/* ── Order summary ── */}
-            <div className="w-full lg:w-[325px] lg:shrink-0">
-              <div className="rounded-[4px] border border-border p-5">
-                <h2 className="text-base font-semibold text-foreground">{t('checkout.order_summary')}</h2>
+            {/* ── Bottom: Coupon (left) + Cart Total (right) ── */}
+            <div className="mt-10 flex flex-col gap-8 lg:flex-row lg:items-start">
+              {/* Coupon code */}
+              <div className="flex flex-1 gap-4">
+                <input
+                  type="text"
+                  value={coupon}
+                  onChange={(e) => setCoupon(e.target.value)}
+                  placeholder={t('cart.coupon_placeholder')}
+                  className="flex-1 rounded-[4px] border border-border bg-background px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-foreground"
+                />
+                <button className="rounded-[4px] border border-[#DB4444] px-6 py-3 text-sm font-medium text-[#DB4444] transition-colors hover:bg-[#DB4444] hover:text-white">
+                  {t('cart.apply_coupon')}
+                </button>
+              </div>
+
+              {/* Cart Total */}
+              <div className="w-full rounded-[4px] border border-border p-6 lg:w-[420px] lg:shrink-0">
+                <h2 className="text-base font-semibold text-foreground">{t('cart.cart_total')}</h2>
 
                 <div className="mt-4 space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{t('cart.subtotal')}</span>
+                  <div className="flex justify-between border-b border-border pb-3 text-sm">
+                    <span className="text-foreground">{t('cart.subtotal')}:</span>
                     <span className="font-medium text-foreground">${total.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{t('cart.shipping')}</span>
-                    <span className="font-medium text-[#00FF66]">{t('cart.free_shipping')}</span>
+                  <div className="flex justify-between border-b border-border pb-3 text-sm">
+                    <span className="text-foreground">{t('cart.shipping')}:</span>
+                    <span className="font-medium text-foreground">{t('cart.free_shipping')}</span>
                   </div>
-                  <div className="h-px bg-border" />
                   <div className="flex justify-between text-sm font-semibold">
-                    <span className="text-foreground">{t('cart.total')}</span>
+                    <span className="text-foreground">{t('cart.total')}:</span>
                     <span className="text-foreground">${total.toFixed(2)}</span>
                   </div>
                 </div>
 
-                {/* Coupon */}
-                <div className="mt-4 flex gap-2">
-                  <input
-                    type="text"
-                    placeholder={t('cart.coupon_placeholder')}
-                    className="flex-1 rounded-[4px] border border-border bg-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-[#DB4444]"
-                  />
-                  <button className="rounded-[4px] bg-[#DB4444] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity">
-                    {t('cart.apply_coupon')}
-                  </button>
-                </div>
-
                 <Link
                   to="/checkout"
-                  className="mt-4 flex w-full items-center justify-center rounded-[4px] bg-[#DB4444] py-3 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+                  className="mt-5 flex w-full items-center justify-center rounded-[4px] bg-[#DB4444] py-4 text-sm font-medium text-white transition-opacity hover:opacity-90"
                 >
-                  {t('cart.checkout')}
+                  {t('cart.proceed_to_checkout')}
                 </Link>
               </div>
             </div>
-          </div>
+          </>
         )}
       </main>
 
@@ -227,7 +230,7 @@ export default function CartPage() {
         open={confirmClear}
         title={t('cart.clear_cart')}
         description={t('cart.clear_confirm')}
-        confirmLabel={t('cart.clear_cart')}
+        confirmLabel={t('cart.remove_all')}
         onConfirm={handleClear}
         onCancel={() => setConfirmClear(false)}
         destructive
@@ -235,7 +238,7 @@ export default function CartPage() {
       <ConfirmDialog
         open={confirmRemoveId !== null}
         title={t('cart.remove')}
-        description="Remove this item from your cart?"
+        description={t('cart.remove_confirm')}
         confirmLabel={t('cart.remove')}
         onConfirm={() => confirmRemoveId !== null && handleRemove(confirmRemoveId)}
         onCancel={() => setConfirmRemoveId(null)}

@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ChevronRight, User, Package, Heart, MapPin, LogOut, Camera } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
@@ -12,46 +11,75 @@ import { logout, selectUserId } from '@/features/auth/model/authSlice'
 import { NetworkError } from '@/shared/ui/network-error'
 import { Header } from '@/widgets/header'
 import { Footer } from '@/widgets/footer'
-import { getImageUrl } from '@/shared/lib/image'
 
-const profileSchema = z.object({
+const schema = z.object({
   firstName: z.string().min(1, 'required'),
   lastName: z.string().min(1, 'required'),
   email: z.string().email('errors.email_invalid'),
-  phoneNumber: z.string().min(6, 'required'),
-  dob: z.string().optional(),
+  streetAddress: z.string().optional(),
+  currentPassword: z.string().optional(),
+  newPassword: z.string().optional(),
+  confirmNewPassword: z.string().optional(),
 })
-type ProfileFormValues = z.infer<typeof profileSchema>
+type ProfileFormValues = z.infer<typeof schema>
 
-const NAV = [
-  { icon: <User className="h-4 w-4" />, key: 'profile.my_profile', to: '/profile' },
-  { icon: <MapPin className="h-4 w-4" />, key: 'profile.address_book', to: '/profile/address' },
-  { icon: <Package className="h-4 w-4" />, key: 'profile.my_orders', to: '/profile/orders' },
-  { icon: <Heart className="h-4 w-4" />, key: 'wishlist.title', to: '/wishlist' },
+const SIDEBAR = [
+  {
+    heading: 'profile.manage_account',
+    links: [
+      { key: 'profile.my_profile', to: '/profile' },
+      { key: 'profile.address_book', to: '/profile/address' },
+      { key: 'profile.payment_options', to: '/profile/payment' },
+    ],
+  },
+  {
+    heading: 'profile.my_orders',
+    links: [
+      { key: 'profile.my_returns', to: '/profile/returns' },
+      { key: 'profile.my_cancellations', to: '/profile/cancellations' },
+    ],
+  },
 ]
+
+function FloatingInput({
+  id,
+  label,
+  type = 'text',
+  className = '',
+  ...props
+}: {
+  id: string
+  label: string
+  type?: string
+  className?: string
+} & React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <div className={`relative rounded-[4px] border border-border bg-background transition-colors focus-within:border-foreground ${className}`}>
+      <label htmlFor={id} className="absolute left-3 top-1.5 pointer-events-none text-[10px] leading-none text-muted-foreground">
+        {label}
+      </label>
+      <input
+        id={id}
+        type={type}
+        className="block w-full bg-transparent pb-3 pl-3 pr-3 pt-5 text-sm text-foreground outline-none"
+        {...props}
+      />
+    </div>
+  )
+}
 
 export default function ProfilePage() {
   const { t } = useTranslation()
   const dispatch = useAppDispatch()
+  const location = useLocation()
   const userId = useAppSelector(selectUserId)
   const { data: profile, status, updateStatus } = useAppSelector((s) => s.profile)
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [_avatarFile, setAvatarFile] = useState<File | null>(null)
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      phoneNumber: '',
-      dob: '',
-    },
+  const { register, handleSubmit, reset } = useForm<ProfileFormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { firstName: '', lastName: '', email: '', streetAddress: '' },
   })
 
   useEffect(() => {
@@ -64,8 +92,10 @@ export default function ProfilePage() {
         firstName: profile.firstName ?? '',
         lastName: profile.lastName ?? '',
         email: profile.email ?? '',
-        phoneNumber: profile.phoneNumber ?? '',
-        dob: profile.dob ?? '',
+        streetAddress: '',
+        currentPassword: '',
+        newPassword: '',
+        confirmNewPassword: '',
       })
     }
   }, [profile, reset])
@@ -75,9 +105,7 @@ export default function ProfilePage() {
       toast.success(t('profile.save_success'))
       if (userId) dispatch(fetchProfile(userId))
     }
-    if (updateStatus === 'error') {
-      toast.error(t('profile.save_error'))
-    }
+    if (updateStatus === 'error') toast.error(t('profile.save_error'))
   }, [updateStatus, t, dispatch, userId])
 
   const onSubmit = (data: ProfileFormValues) => {
@@ -85,93 +113,79 @@ export default function ProfilePage() {
     formData.append('FirstName', data.firstName)
     formData.append('LastName', data.lastName)
     formData.append('Email', data.email)
-    formData.append('PhoneNumber', data.phoneNumber)
-    if (data.dob) formData.append('Dob', data.dob)
+    formData.append('PhoneNumber', profile?.phoneNumber ?? '')
     if (fileInputRef.current?.files?.[0]) {
       formData.append('Image', fileInputRef.current.files[0])
     }
     dispatch(updateProfile(formData))
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const url = URL.createObjectURL(file)
-      setAvatarPreview(url)
-    }
-  }
-
-  const handleLogout = () => {
-    dispatch(logout())
-  }
-
-  const inputClass = (hasError: boolean) =>
-    `w-full rounded-[4px] border bg-[#F5F5F5] px-4 py-3 text-sm text-foreground outline-none placeholder:text-[#8D8D8D] transition-colors focus:border-primary ${
-      hasError ? 'border-primary' : 'border-transparent'
-    }`
+  const handleLogout = () => { dispatch(logout()) }
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
 
       <main className="flex-1">
-        {/* ── Breadcrumb ── */}
+        {/* Breadcrumb */}
         <div className="mx-auto w-full max-w-[1170px] px-4 py-5 xl:px-0">
-          <nav className="flex items-center gap-2 text-sm text-[#8D8D8D]">
-            <Link to="/" className="transition-colors hover:text-foreground">
-              {t('nav.home')}
-            </Link>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-foreground">{t('profile.title')}</span>
+          <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Link to="/" className="transition-colors hover:text-foreground">{t('nav.home')}</Link>
+            <span>/</span>
+            <span className="text-foreground">{t('profile.my_account')}</span>
           </nav>
         </div>
 
         <div className="mx-auto max-w-[1170px] px-4 pb-16 xl:px-0">
-          <div className="flex flex-col gap-8 lg:flex-row">
+          <div className="flex flex-col gap-10 lg:flex-row">
 
-            {/* ── Sidebar ── */}
-            <aside className="w-full shrink-0 lg:w-[250px]">
-              <div className="rounded-[4px] border border-[#EBEBEB] p-5">
-                <div className="mb-6">
-                  <p className="text-xs font-medium uppercase tracking-wider text-[#8D8D8D]">
-                    Manage My Account
-                  </p>
-                  <ul className="mt-3 space-y-1">
-                    {NAV.map((item) => (
-                      <li key={item.key}>
-                        <Link
-                          to={item.to}
-                          className="flex items-center gap-3 rounded-[4px] px-3 py-2.5 text-sm transition-colors hover:bg-[#F5F5F5] hover:text-primary"
-                        >
-                          {item.icon}
-                          {t(item.key)}
-                        </Link>
-                      </li>
-                    ))}
+            {/* ── Sidebar (text-only, no icons) ── */}
+            <aside className="w-full shrink-0 lg:w-[220px]">
+              {SIDEBAR.map((section) => (
+                <div key={section.heading} className="mb-6">
+                  <p className="mb-3 text-sm font-semibold text-foreground">{t(section.heading)}</p>
+                  <ul className="space-y-1">
+                    {section.links.map((link) => {
+                      const isActive = location.pathname === link.to
+                      return (
+                        <li key={link.key}>
+                          <Link
+                            to={link.to}
+                            className={`block pl-4 py-1 text-sm transition-colors ${
+                              isActive ? 'text-[#DB4444] font-medium' : 'text-muted-foreground hover:text-foreground'
+                            }`}
+                          >
+                            {t(link.key)}
+                          </Link>
+                        </li>
+                      )
+                    })}
                   </ul>
                 </div>
+              ))}
 
-                <div className="border-t border-[#EBEBEB] pt-4">
-                  <button
-                    onClick={handleLogout}
-                    className="flex w-full items-center gap-3 rounded-[4px] px-3 py-2.5 text-sm text-[#8D8D8D] transition-colors hover:bg-[#F5F5F5] hover:text-primary"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    {t('auth.logout')}
-                  </button>
-                </div>
+              <div>
+                <Link
+                  to="/wishlist"
+                  className="block text-sm font-semibold text-foreground transition-colors hover:text-[#DB4444]"
+                >
+                  {t('profile.my_wishlist')}
+                </Link>
               </div>
+
+              <button
+                onClick={handleLogout}
+                className="mt-8 block text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {t('auth.logout')}
+              </button>
             </aside>
 
-            {/* ── Main content ── */}
+            {/* ── Profile form card ── */}
             <div className="flex-1">
               {status === 'loading' && (
-                <div className="animate-pulse space-y-4">
-                  <div className="h-8 w-48 rounded bg-[#F5F5F5]" />
-                  <div className="h-24 w-24 rounded-full bg-[#F5F5F5]" />
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="h-12 rounded bg-[#F5F5F5]" />
-                  ))}
+                <div className="animate-pulse space-y-4 rounded-[4px] border border-border p-8">
+                  {[1, 2, 3, 4, 5].map((i) => <div key={i} className="h-12 rounded bg-muted" />)}
                 </div>
               )}
 
@@ -180,141 +194,92 @@ export default function ProfilePage() {
               )}
 
               {(status === 'success' || status === 'idle') && (
-                <div className="rounded-[4px] border border-[#EBEBEB] p-8">
-                  <h1 className="mb-8 text-xl font-semibold text-primary">
-                    {t('profile.edit_profile')}
+                <div className="rounded-[4px] border border-border p-8 shadow-sm">
+                  <h1 className="mb-8 text-xl font-semibold text-[#DB4444]">
+                    {t('profile.profile_title')}
                   </h1>
 
-                  {/* Avatar */}
-                  <div className="mb-8 flex items-center gap-6">
-                    <div className="relative">
-                      <div className="h-24 w-24 overflow-hidden rounded-full bg-[#F5F5F5]">
-                        {avatarPreview ? (
-                          <img
-                            src={avatarPreview}
-                            alt="Avatar"
-                            className="h-full w-full object-cover"
-                          />
-                        ) : profile?.image ? (
-                          <img
-                            src={getImageUrl(profile.image)}
-                            alt="Avatar"
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-[#8D8D8D]">
-                            <User className="h-12 w-12" />
-                          </div>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white shadow transition-opacity hover:opacity-90"
-                        aria-label={t('profile.change_photo')}
-                      >
-                        <Camera className="h-4 w-4" />
-                      </button>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleFileChange}
+                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) setAvatarFile(e.target.files[0]) }} />
+
+                  <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
+                    {/* Row 1: First name + Last name */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <FloatingInput
+                        id="firstName"
+                        label={t('profile.first_name')}
+                        {...register('firstName')}
+                      />
+                      <FloatingInput
+                        id="lastName"
+                        label={t('profile.last_name')}
+                        {...register('lastName')}
                       />
                     </div>
+
+                    {/* Row 2: Email + Street address */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <FloatingInput
+                        id="email"
+                        label={t('profile.email_address')}
+                        type="email"
+                        {...register('email')}
+                      />
+                      <FloatingInput
+                        id="streetAddress"
+                        label={t('profile.street_address')}
+                        {...register('streetAddress')}
+                      />
+                    </div>
+
+                    {/* Password Changes */}
                     <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {profile?.firstName} {profile?.lastName}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="mt-1 text-sm text-primary underline underline-offset-4 hover:opacity-80"
-                      >
-                        {t('profile.change_photo')}
-                      </button>
-                    </div>
-                  </div>
+                      <h2 className="mb-4 text-sm font-medium text-foreground">{t('profile.password_changes')}</h2>
 
-                  {/* Form */}
-                  <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <div>
-                        <label className="mb-1.5 block text-sm font-medium text-foreground">
-                          {t('profile.first_name')}
-                        </label>
+                      <div className="space-y-4">
                         <input
-                          {...register('firstName')}
-                          className={inputClass(!!errors.firstName)}
+                          type="password"
+                          placeholder={t('profile.current_password')}
+                          className="w-full rounded-[4px] border border-border bg-background px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-foreground"
+                          {...register('currentPassword')}
                         />
-                      </div>
-                      <div>
-                        <label className="mb-1.5 block text-sm font-medium text-foreground">
-                          {t('profile.last_name')}
-                        </label>
-                        <input
-                          {...register('lastName')}
-                          className={inputClass(!!errors.lastName)}
-                        />
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <input
+                            type="password"
+                            placeholder={t('profile.new_password')}
+                            className="w-full rounded-[4px] border border-border bg-background px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-foreground"
+                            {...register('newPassword')}
+                          />
+                          <input
+                            type="password"
+                            placeholder={t('profile.confirm_new_password')}
+                            className="w-full rounded-[4px] border border-border bg-background px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-foreground"
+                            {...register('confirmNewPassword')}
+                          />
+                        </div>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <div>
-                        <label className="mb-1.5 block text-sm font-medium text-foreground">
-                          {t('profile.email')}
-                        </label>
-                        <input
-                          {...register('email')}
-                          type="email"
-                          className={inputClass(!!errors.email)}
-                        />
-                        {errors.email && (
-                          <p className="mt-1 text-xs text-primary">{t(errors.email.message ?? 'errors.email_invalid')}</p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="mb-1.5 block text-sm font-medium text-foreground">
-                          {t('profile.phone')}
-                        </label>
-                        <input
-                          {...register('phoneNumber')}
-                          type="tel"
-                          className={inputClass(!!errors.phoneNumber)}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="sm:w-1/2">
-                      <label className="mb-1.5 block text-sm font-medium text-foreground">
-                        {t('profile.dob')}
-                      </label>
-                      <input
-                        {...register('dob')}
-                        type="date"
-                        className={inputClass(!!errors.dob)}
-                      />
-                    </div>
-
-                    <div className="flex justify-end gap-3 pt-2">
+                    {/* Actions */}
+                    <div className="flex justify-end gap-4 pt-2">
                       <button
                         type="button"
                         onClick={() => profile && reset({
-                          firstName: profile.firstName,
-                          lastName: profile.lastName,
-                          email: profile.email,
-                          phoneNumber: profile.phoneNumber,
-                          dob: profile.dob,
+                          firstName: profile.firstName ?? '',
+                          lastName: profile.lastName ?? '',
+                          email: profile.email ?? '',
+                          streetAddress: '',
+                          currentPassword: '',
+                          newPassword: '',
+                          confirmNewPassword: '',
                         })}
-                        className="rounded-[4px] border border-[#C4C4C4] px-8 py-3 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
+                        className="rounded-[4px] px-8 py-3 text-sm font-medium text-foreground transition-colors hover:text-muted-foreground"
                       >
                         {t('profile.cancel')}
                       </button>
                       <button
                         type="submit"
                         disabled={updateStatus === 'loading'}
-                        className="rounded-[4px] bg-primary px-8 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+                        className="rounded-[4px] bg-[#DB4444] px-8 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
                       >
                         {updateStatus === 'loading' ? '...' : t('profile.save_changes')}
                       </button>
