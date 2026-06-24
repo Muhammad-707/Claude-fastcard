@@ -67,13 +67,36 @@ const productsSlice = createSlice({
     b.addCase(fetchProducts.pending, (s) => { s.listStatus = 'loading' })
      .addCase(fetchProducts.fulfilled, (s, a) => {
        s.listStatus = 'success'
-       const payload = a.payload as typeof initialState.pagination & { data: Product[] }
-       s.list = payload.data ?? []
+       const raw = a.payload as {
+         data: unknown
+         pageNumber?: number
+         pageSize?: number
+         totalPage?: number
+         totalRecord?: number
+       }
+       // Guard: API might return Paginated<T> directly or wrapped in an envelope.
+       // In both cases we ensure list is always a Product[].
+       const dataField = raw.data
+       if (Array.isArray(dataField)) {
+         s.list = dataField as Product[]
+       } else if (dataField !== null && typeof dataField === 'object') {
+         const inner = dataField as { data?: unknown; pageNumber?: number; pageSize?: number; totalPage?: number; totalRecord?: number }
+         s.list = Array.isArray(inner.data) ? (inner.data as Product[]) : []
+         s.pagination = {
+           pageNumber: inner.pageNumber ?? raw.pageNumber ?? 1,
+           pageSize: inner.pageSize ?? raw.pageSize ?? 12,
+           totalPage: inner.totalPage ?? raw.totalPage ?? 1,
+           totalRecord: inner.totalRecord ?? raw.totalRecord ?? 0,
+         }
+         return
+       } else {
+         s.list = []
+       }
        s.pagination = {
-         pageNumber: payload.pageNumber ?? 1,
-         pageSize: payload.pageSize ?? 12,
-         totalPage: payload.totalPage ?? 1,
-         totalRecord: payload.totalRecord ?? 0,
+         pageNumber: raw.pageNumber ?? 1,
+         pageSize: raw.pageSize ?? 12,
+         totalPage: raw.totalPage ?? 1,
+         totalRecord: raw.totalRecord ?? 0,
        }
      })
      .addCase(fetchProducts.rejected, (s) => { s.listStatus = 'error' })

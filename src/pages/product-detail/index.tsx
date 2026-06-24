@@ -255,7 +255,7 @@ export default function ProductDetailPage() {
             <span className="text-sm font-semibold text-primary">Related Items</span>
           </div>
           <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {list.slice(0, 4).map((p) => <ProductCard key={p.id} product={p} />)}
+            {(Array.isArray(list) ? list : []).slice(0, 4).map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
         </section>
       </main>

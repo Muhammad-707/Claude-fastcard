@@ -27,7 +27,8 @@ export default function WishlistPage() {
     }
   }, [dispatch, wishlistIds.length])
 
-  const wishlistProducts = products.filter((p) => wishlistIds.includes(p.id))
+  const safeProducts = Array.isArray(products) ? products : []
+  const wishlistProducts = safeProducts.filter((p) => wishlistIds.includes(p.id))
 
   const handleAddAllToCart = () => {
     if (!isAuth) { toast.error(t('auth.login')); return }

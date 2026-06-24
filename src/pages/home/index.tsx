@@ -49,9 +49,10 @@ export default function HomePage() {
     dispatch(fetchCategories())
   }, [dispatch])
 
-  const flashSales = products.slice(0, 8)
-  const bestSelling = products.slice(0, 4)
-  const exploreProducts = products.slice(0, 8)
+  const safeProducts = Array.isArray(products) ? products : []
+  const flashSales = safeProducts.slice(0, 8)
+  const bestSelling = safeProducts.slice(0, 4)
+  const exploreProducts = safeProducts.slice(0, 8)
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
