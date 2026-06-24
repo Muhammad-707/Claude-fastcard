@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { forwardRef, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -17,30 +17,26 @@ const schema = z.object({
 })
 type FormValues = z.infer<typeof schema>
 
-function FloatingInput({
-  id,
-  label,
-  type = 'text',
-  hasError,
-  showToggle,
-  onToggle,
-  showValue,
-  ...props
-}: {
+interface FloatingInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   id: string
   label: string
-  type?: string
   hasError?: boolean
   showToggle?: boolean
   onToggle?: () => void
   showValue?: boolean
-} & React.InputHTMLAttributes<HTMLInputElement>) {
+}
+
+const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(function FloatingInput(
+  { id, label, type = 'text', hasError, showToggle, onToggle, showValue, ...props },
+  ref
+) {
   return (
     <div className={`relative rounded-[4px] border bg-background transition-colors focus-within:border-foreground ${hasError ? 'border-[#DB4444]' : 'border-border'}`}>
       <label htmlFor={id} className="absolute left-3 top-1.5 pointer-events-none text-[10px] leading-none text-muted-foreground">
         {label}
       </label>
       <input
+        ref={ref}
         id={id}
         type={showToggle ? (showValue ? 'text' : 'password') : type}
         className="block w-full bg-transparent pb-3 pl-3 pr-10 pt-5 text-sm text-foreground outline-none"
@@ -59,7 +55,7 @@ function FloatingInput({
       )}
     </div>
   )
-}
+})
 
 export default function LoginPage() {
   const { t } = useTranslation()
@@ -91,9 +87,6 @@ export default function LoginPage() {
     dispatch(loginThunk(data))
   }
 
-  const { ref: userNameRef, ...userNameRest } = register('userName')
-  const { ref: passwordRef, ...passwordRest } = register('password')
-
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
@@ -111,8 +104,7 @@ export default function LoginPage() {
                 type="text"
                 autoComplete="username"
                 hasError={!!errors.userName}
-                ref={userNameRef}
-                {...userNameRest}
+                {...register('userName')}
               />
               {errors.userName && (
                 <p className="mt-1 text-xs text-[#DB4444]">{t('auth.errors.username_required')}</p>
@@ -128,8 +120,7 @@ export default function LoginPage() {
                 onToggle={() => setShowPassword((v) => !v)}
                 showValue={showPassword}
                 autoComplete="current-password"
-                ref={passwordRef}
-                {...passwordRest}
+                {...register('password')}
               />
               {errors.password && (
                 <p className="mt-1 text-xs text-[#DB4444]">{t('auth.errors.password_min')}</p>
