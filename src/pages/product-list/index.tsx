@@ -32,41 +32,53 @@ export default function ProductsPage() {
   const [maxPrice, setMaxPrice] = useState('')
 
   const categoryId = searchParams.get('categoryId') ? Number(searchParams.get('categoryId')) : undefined
+  const subcategoryId = searchParams.get('subcategoryId') ? Number(searchParams.get('subcategoryId')) : undefined
   const productName = searchParams.get('q') ?? ''
+
+  const activeCategory = categories.find((c) => c.id === categoryId)
 
   useEffect(() => {
     dispatch(fetchCategories())
   }, [dispatch])
 
   useEffect(() => {
-    const params = {
+    dispatch(fetchProducts({
       ...filters,
       categoryId,
+      subcategoryId,
       productName: productName || undefined,
-    }
-    dispatch(fetchProducts(params))
-  }, [dispatch, filters, categoryId, productName])
+    }))
+  }, [dispatch, filters, categoryId, subcategoryId, productName])
 
   const handleCategoryClick = useCallback((id: number | undefined) => {
-    const next = new URLSearchParams(searchParams)
+    const next = new URLSearchParams()
     if (id) next.set('categoryId', String(id))
-    else next.delete('categoryId')
+    if (searchParams.get('q')) next.set('q', searchParams.get('q')!)
+    setSearchParams(next)
+    dispatch(setPage(1))
+    setSidebarOpen(false)
+  }, [dispatch, searchParams, setSearchParams])
+
+  const handleSubcategoryClick = useCallback((subId: number) => {
+    const next = new URLSearchParams(searchParams)
+    next.set('subcategoryId', String(subId))
     setSearchParams(next)
     dispatch(setPage(1))
     setSidebarOpen(false)
   }, [dispatch, searchParams, setSearchParams])
 
   const handlePriceFilter = () => {
-    dispatch(setFilters({
+    const newFilters = {
       minPrice: minPrice ? Number(minPrice) : undefined,
       maxPrice: maxPrice ? Number(maxPrice) : undefined,
-    }))
+    }
+    dispatch(setFilters(newFilters))
     dispatch(fetchProducts({
       ...filters,
+      ...newFilters,
       categoryId,
+      subcategoryId,
       productName: productName || undefined,
-      minPrice: minPrice ? Number(minPrice) : undefined,
-      maxPrice: maxPrice ? Number(maxPrice) : undefined,
     }))
   }
 
@@ -74,11 +86,10 @@ export default function ProductsPage() {
     setMinPrice('')
     setMaxPrice('')
     dispatch(resetFilters())
-    const next = new URLSearchParams()
-    setSearchParams(next)
+    setSearchParams(new URLSearchParams())
   }
 
-  const hasActiveFilters = !!categoryId || !!productName || !!minPrice || !!maxPrice
+  const hasActiveFilters = !!categoryId || !!subcategoryId || !!productName || !!minPrice || !!maxPrice
 
   const pages = Array.from({ length: pagination.totalPage }, (_, i) => i + 1)
   const safeList = Array.isArray(list) ? list : []
@@ -87,40 +98,63 @@ export default function ProductsPage() {
     <aside className="w-full lg:w-[220px] lg:shrink-0">
       {/* Categories */}
       <div className="pb-6">
-        <h3 className="mb-4 text-sm font-semibold text-foreground">{t('products.all_categories')}</h3>
-        <ul className="space-y-2.5">
+        <h3 className="mb-4 text-sm font-bold text-foreground">{t('products.all_categories')}</h3>
+        <ul className="space-y-1.5">
           <li>
             <button
               onClick={() => handleCategoryClick(undefined)}
-              className={`flex w-full items-center justify-between text-sm transition-colors hover:text-[#DB4444] ${
+              className={`flex w-full items-center justify-between rounded-[2px] py-1.5 text-sm transition-colors hover:text-[#DB4444] ${
                 !categoryId ? 'font-semibold text-[#DB4444]' : 'text-foreground'
               }`}
             >
               {t('products.all_categories')}
-              <ChevronRight className="h-3.5 w-3.5 shrink-0" />
             </button>
           </li>
           {categories.map((cat) => (
             <li key={cat.id}>
               <button
                 onClick={() => handleCategoryClick(cat.id)}
-                className={`flex w-full items-center justify-between text-sm transition-colors hover:text-[#DB4444] ${
+                className={`flex w-full items-center justify-between rounded-[2px] py-1.5 text-sm transition-colors hover:text-[#DB4444] ${
                   categoryId === cat.id ? 'font-semibold text-[#DB4444]' : 'text-foreground'
                 }`}
               >
                 {cat.categoryName}
-                <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+                {cat.subCategories.length > 0 && <ChevronRight className="h-3 w-3 shrink-0" />}
               </button>
             </li>
           ))}
         </ul>
       </div>
 
+      {/* Subcategories (shown when category is active) */}
+      {activeCategory && activeCategory.subCategories.length > 0 && (
+        <>
+          <div className="h-px bg-border" />
+          <div className="py-5">
+            <h3 className="mb-3 text-sm font-bold text-foreground">{activeCategory.categoryName}</h3>
+            <ul className="space-y-1.5 pl-3">
+              {activeCategory.subCategories.map((sub) => (
+                <li key={sub.id}>
+                  <button
+                    onClick={() => handleSubcategoryClick(sub.id)}
+                    className={`w-full text-left py-1 text-sm transition-colors hover:text-[#DB4444] ${
+                      subcategoryId === sub.id ? 'font-semibold text-[#DB4444]' : 'text-muted-foreground'
+                    }`}
+                  >
+                    {sub.subCategoryName}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </>
+      )}
+
       <div className="h-px bg-border" />
 
       {/* Price filter */}
       <div className="py-6">
-        <h3 className="mb-4 text-sm font-semibold text-foreground">Price Range</h3>
+        <h3 className="mb-4 text-sm font-bold text-foreground">Price Range</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <input
@@ -130,7 +164,7 @@ export default function ProductsPage() {
               onChange={(e) => setMinPrice(e.target.value)}
               className="w-full rounded-[4px] border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-[#DB4444] placeholder:text-muted-foreground"
             />
-            <span className="text-muted-foreground">—</span>
+            <span className="shrink-0 text-muted-foreground">—</span>
             <input
               type="number"
               placeholder="Max"
@@ -173,11 +207,29 @@ export default function ProductsPage() {
         {/* Breadcrumb */}
         <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
           <Link to="/" className="hover:text-[#DB4444] transition-colors">{t('nav.home')}</Link>
-          <ChevronRight className="h-3.5 w-3.5" />
-          <span className="text-foreground">{t('products.title')}</span>
+          <span>/</span>
+          <span className={categoryId ? 'cursor-pointer hover:text-[#DB4444] transition-colors' : 'text-foreground'} onClick={() => categoryId && handleCategoryClick(undefined)}>
+            {t('products.title')}
+          </span>
+          {activeCategory && (
+            <>
+              <span>/</span>
+              <span className={subcategoryId ? 'cursor-pointer hover:text-[#DB4444] transition-colors' : 'text-foreground'}>
+                {activeCategory.categoryName}
+              </span>
+            </>
+          )}
+          {subcategoryId && activeCategory && (
+            <>
+              <span>/</span>
+              <span className="text-foreground">
+                {activeCategory.subCategories.find((s) => s.id === subcategoryId)?.subCategoryName}
+              </span>
+            </>
+          )}
           {productName && (
             <>
-              <ChevronRight className="h-3.5 w-3.5" />
+              <span>/</span>
               <span className="text-foreground">&ldquo;{productName}&rdquo;</span>
             </>
           )}
@@ -188,11 +240,10 @@ export default function ProductsPage() {
           <div className="hidden lg:block">{Sidebar}</div>
 
           {/* ── Products grid ── */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {/* Toolbar */}
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                {/* Mobile filter toggle */}
                 <button
                   onClick={() => setSidebarOpen(true)}
                   className="flex items-center gap-2 rounded-[4px] border border-border px-3 py-1.5 text-sm text-foreground hover:border-[#DB4444] hover:text-[#DB4444] transition-colors lg:hidden"
@@ -223,7 +274,7 @@ export default function ProductsPage() {
 
             {listStatus === 'error' && (
               <NetworkError
-                onRetry={() => dispatch(fetchProducts({ ...filters, categoryId, productName: productName || undefined }))}
+                onRetry={() => dispatch(fetchProducts({ ...filters, categoryId, subcategoryId, productName: productName || undefined }))}
               />
             )}
 
@@ -237,7 +288,7 @@ export default function ProductsPage() {
 
             {listStatus === 'success' && safeList.length > 0 && (
               <>
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
+                <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 xl:grid-cols-4">
                   {safeList.map((p) => <ProductCard key={p.id} product={p} />)}
                 </div>
 
