@@ -46,7 +46,7 @@ export function ProductCard({ product, showBadge }: ProductCardProps) {
         <img
           src={getImageUrl(image)}
           alt={product.productName}
-          className="h-[260px] w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+          className="h-[280px] w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
           loading="lazy"
         />
 
@@ -57,8 +57,8 @@ export function ProductCard({ product, showBadge }: ProductCardProps) {
           </span>
         )}
         {(showBadge === 'sale' || discountPct) && (
-          <span className="absolute left-3 top-3 rounded-[4px] bg-primary px-3 py-1 text-xs font-medium text-white">
-            -{discountPct}%
+          <span className="absolute left-3 top-3 rounded-[4px] bg-[#DB4444] px-3 py-1 text-xs font-medium text-white">
+            -{discountPct ?? 0}%
           </span>
         )}
 
@@ -96,7 +96,7 @@ export function ProductCard({ product, showBadge }: ProductCardProps) {
       <div className="mt-3 space-y-1">
         <p className="text-sm font-medium text-foreground line-clamp-1">{product.productName}</p>
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-primary">${price}</span>
+          <span className="text-sm font-semibold text-[#DB4444]">${price}</span>
           {product.hasDiscount && (
             <span className="text-sm text-[#8D8D8D] line-through">${product.price}</span>
           )}

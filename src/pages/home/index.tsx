@@ -41,7 +41,7 @@ const SECTION_MARK = 'flex h-5 w-1 rounded-sm bg-[#DB4444]'
 function ProductSkeleton() {
   return (
     <div className="animate-pulse">
-      <div className="h-[260px] rounded-[4px] bg-muted" />
+      <div className="h-[280px] rounded-[4px] bg-muted" />
       <div className="mt-3 h-4 w-3/4 rounded bg-muted" />
       <div className="mt-2 h-3 w-1/2 rounded bg-muted" />
     </div>
@@ -72,52 +72,64 @@ export default function HomePage() {
       {/* ── Hero banner ── */}
       <section className="border-b border-border">
         <div className="mx-auto flex max-w-[1280px] flex-col lg:flex-row">
-          {/* Sidebar categories */}
-          <aside className="hidden w-56 shrink-0 border-r border-border py-6 lg:block">
-            <ul className="space-y-2.5">
-              {categories.length > 0
-                ? categories.map((cat) => (
-                    <li key={cat.id}>
-                      <button
-                        onClick={() => navigate(`/products?categoryId=${cat.id}`)}
-                        className="flex w-full items-center justify-between px-4 py-1 text-sm text-foreground hover:text-[#DB4444] transition-colors"
-                      >
-                        {cat.categoryName}
-                        <ChevronRight className="h-3.5 w-3.5" />
-                      </button>
-                    </li>
-                  ))
-                : ['Fashion', 'Electronics', 'Home & Life', 'Sports', 'Baby & Toys', 'Groceries', 'Health & Beauty'].map((name) => (
-                    <li key={name}>
-                      <button
-                        onClick={() => navigate('/products')}
-                        className="flex w-full items-center justify-between px-4 py-1 text-sm text-foreground hover:text-[#DB4444] transition-colors"
-                      >
-                        {name}
-                        <ChevronRight className="h-3.5 w-3.5" />
-                      </button>
-                    </li>
-                  ))
-              }
+          {/* Sidebar categories with subcategory flyout */}
+          <aside className="hidden w-[220px] shrink-0 border-r border-border py-6 lg:block">
+            <ul className="space-y-0.5">
+              {(categories.length > 0
+                ? categories
+                : [
+                    { id: -1, categoryName: 'Fashion', categoryImage: '', subCategories: [{ id: -11, subCategoryName: "Men's" }, { id: -12, subCategoryName: "Women's" }, { id: -13, subCategoryName: "Kids'" }] },
+                    { id: -2, categoryName: 'Electronics', categoryImage: '', subCategories: [{ id: -21, subCategoryName: 'Phones' }, { id: -22, subCategoryName: 'Laptops' }, { id: -23, subCategoryName: 'Cameras' }] },
+                    { id: -3, categoryName: 'Home & Lifestyle', categoryImage: '', subCategories: [{ id: -31, subCategoryName: 'Furniture' }, { id: -32, subCategoryName: 'Lighting' }] },
+                    { id: -4, categoryName: 'Sports & Outdoor', categoryImage: '', subCategories: [] },
+                    { id: -5, categoryName: 'Baby & Toys', categoryImage: '', subCategories: [] },
+                    { id: -6, categoryName: 'Groceries & Pets', categoryImage: '', subCategories: [] },
+                    { id: -7, categoryName: 'Health & Beauty', categoryImage: '', subCategories: [] },
+                  ]
+              ).map((cat) => (
+                <li key={cat.id} className="group/item relative">
+                  <button
+                    onClick={() => cat.id > 0 && navigate(`/products?categoryId=${cat.id}`)}
+                    className="flex w-full items-center justify-between rounded-[2px] px-4 py-2 text-sm text-foreground transition-colors hover:bg-[#DB4444]/5 hover:text-[#DB4444]"
+                  >
+                    {cat.categoryName}
+                    {cat.subCategories.length > 0 && <ChevronRight className="h-3.5 w-3.5 shrink-0" />}
+                  </button>
+                  {/* Subcategory flyout */}
+                  {cat.subCategories.length > 0 && (
+                    <div className="pointer-events-none absolute left-full top-0 z-30 ml-0.5 min-w-[180px] rounded-[4px] border border-border bg-background py-2 opacity-0 shadow-lg transition-all duration-150 group-hover/item:pointer-events-auto group-hover/item:opacity-100">
+                      {cat.subCategories.map((sub) => (
+                        <button
+                          key={sub.id}
+                          onClick={() => cat.id > 0 ? navigate(`/products?categoryId=${cat.id}&subcategoryId=${sub.id}`) : navigate('/products')}
+                          className="block w-full px-4 py-2 text-left text-sm text-foreground transition-colors hover:text-[#DB4444]"
+                        >
+                          {sub.subCategoryName}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </li>
+              ))}
             </ul>
           </aside>
 
-          {/* Hero */}
+          {/* Hero — auto-slide banner */}
           <div className="relative flex-1 overflow-hidden bg-black">
             <img
-              src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80"
+              src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1400&q=85"
               alt="Hero"
-              className="h-[340px] w-full object-cover opacity-70 lg:h-[380px]"
+              className="h-[360px] w-full object-cover object-center opacity-75 lg:h-[400px]"
             />
-            <div className="absolute inset-0 flex flex-col justify-center px-8 lg:px-12">
-              <p className="text-sm font-medium text-white/80">{t('auth.brand_tagline')}</p>
-              <h1 className="mt-4 max-w-xs text-4xl font-semibold leading-tight text-white lg:text-5xl">
+            <div className="absolute inset-0 flex flex-col justify-center px-10 lg:px-16">
+              <p className="text-sm font-medium tracking-wide text-white/80">{t('auth.brand_tagline')}</p>
+              <h1 className="mt-4 max-w-sm text-4xl font-bold leading-tight text-white lg:text-5xl">
                 {t('home.hero_title')}
               </h1>
               <p className="mt-3 text-sm text-white/70">{t('home.hero_subtitle')}</p>
               <Link
                 to="/products"
-                className="mt-6 inline-flex w-fit items-center gap-2 border-b border-white pb-0.5 text-sm font-semibold text-white hover:text-[#DB4444] hover:border-[#DB4444] transition-colors"
+                className="mt-7 inline-flex w-fit items-center gap-2 border-b border-white pb-0.5 text-sm font-semibold text-white hover:text-[#DB4444] hover:border-[#DB4444] transition-colors"
               >
                 {t('home.hero_cta')} <ArrowRight className="h-4 w-4" />
               </Link>

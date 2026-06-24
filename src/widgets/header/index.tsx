@@ -119,6 +119,14 @@ export function Header() {
 
   return (
     <>
+      {/* ── Announcement bar ── */}
+      <div className="hidden bg-black py-3 text-center text-xs font-medium text-white sm:block">
+        Summer Sale For All Swim Suits And Free Express Delivery - OFF 50%!{' '}
+        <Link to="/products" className="font-bold underline underline-offset-2 hover:text-[#DB4444] transition-colors">
+          ShopNow
+        </Link>
+      </div>
+
       <header className="border-b border-border bg-background">
         {/* ── Desktop ── */}
         <div className="mx-auto hidden max-w-[1280px] items-center justify-between px-4 py-4 xl:px-0 lg:flex">
