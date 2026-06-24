@@ -11,7 +11,9 @@
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
       "Bash(dir \"C:\\\\Users\\\\Muhammad\\\\Desktop\\\\exam3-fastcard\")",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(npm run *)",
+      "Bash(curl -s \"https://store-api.softclub.tj/Product/get-products?PageNumber=1&PageSize=5\" -H \"Accept: application/json\")"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -14,7 +14,7 @@ import { Footer } from '@/widgets/footer'
 function ProductSkeleton() {
   return (
     <div className="animate-pulse">
-      <div className="h-[280px] rounded-[4px] bg-muted" />
+      <div className="h-[290px] rounded-[4px] bg-muted" />
       <div className="mt-3 h-4 w-3/4 rounded bg-muted" />
       <div className="mt-2 h-3 w-1/2 rounded bg-muted" />
     </div>

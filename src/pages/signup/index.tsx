@@ -1,21 +1,34 @@
-import { useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { CheckCircle2, Eye, EyeOff, ShoppingCart } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { registerThunk, clearRegisterError } from '@/features/auth/model/authSlice'
 import { Header } from '@/widgets/header'
 import { Footer } from '@/widgets/footer'
 
 const schema = z.object({
-  userName: z.string().min(1, 'errors.username_required'),
-  email: z.string().email('errors.email_invalid').min(1, 'errors.email_required'),
-  phoneNumber: z.string().min(6, 'errors.phone_required'),
-  password: z.string().min(6, 'errors.password_min'),
+  userName: z.string().min(2, 'auth.errors.username_required'),
+  email: z.string().email('auth.errors.email_invalid'),
+  phoneNumber: z
+    .string()
+    .min(6, 'auth.errors.phone_required')
+    .regex(/^\+?\d[\d\s\-()]{5,}$/, 'auth.errors.phone_required'),
+  password: z
+    .string()
+    .min(8, 'auth.errors.password_min')
+    .regex(/[A-Z]/, 'auth.errors.password_uppercase')
+    .regex(/[!@#$%^&*(),.?":{}|<>]/, 'auth.errors.password_special'),
+  confirmPassword: z.string().min(1, 'auth.errors.password_required'),
+}).refine((d) => d.password === d.confirmPassword, {
+  message: 'auth.errors.passwords_mismatch',
+  path: ['confirmPassword'],
 })
+
 type FormValues = z.infer<typeof schema>
 
 const inputCls = (hasError: boolean) =>
@@ -23,49 +36,78 @@ const inputCls = (hasError: boolean) =>
     hasError ? 'border-[#DB4444] focus:border-[#DB4444]' : 'border-border focus:border-foreground'
   }`
 
-function GoogleIcon() {
+function SuccessScreen({ email }: { email: string }) {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" aria-hidden="true">
-      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-    </svg>
+    <div className="flex w-full max-w-[400px] flex-col items-center gap-6 text-center">
+      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#DB4444]/10">
+        <CheckCircle2 className="h-10 w-10 text-[#DB4444]" />
+      </div>
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">{t('auth.register_success_title')}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {t('auth.register_success_desc', { email })}
+        </p>
+      </div>
+      <div className="w-full rounded-xl border border-border bg-muted/50 p-5">
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          {t('auth.registered_as')}
+        </p>
+        <p className="mt-1 text-sm font-semibold text-foreground">{email}</p>
+      </div>
+      <button
+        onClick={() => navigate('/login', { replace: true })}
+        className="w-full rounded-[4px] bg-[#DB4444] py-4 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+      >
+        {t('auth.go_to_login')}
+      </button>
+      <p className="text-xs text-muted-foreground">
+        {t('auth.login_after_register')}
+      </p>
+    </div>
   )
 }
 
 export default function SignUpPage() {
   const { t } = useTranslation()
   const dispatch = useAppDispatch()
-  const navigate = useNavigate()
-  const { registerLoading, registerError } = useAppSelector((s) => s.auth)
+  const { registerLoading } = useAppSelector((s) => s.auth)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null)
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-  })
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
-  useEffect(() => {
-    if (registerError) {
-      const errorMap: Record<string, string> = {
-        user_exists: t('auth.errors.user_exists'),
-        server_error: t('auth.errors.server_error'),
-      }
-      toast.error(errorMap[registerError] ?? t('auth.errors.server_error'))
-      dispatch(clearRegisterError())
-    }
-  }, [registerError, t, dispatch])
+  const getErrorMsg = (key: string | undefined) => {
+    if (!key) return null
+    return t(key) ?? key
+  }
 
   const onSubmit = async (data: FormValues) => {
     const result = await dispatch(registerThunk({
       userName: data.userName,
       email: data.email,
-      phoneNumber: data.phoneNumber,
+      phoneNumber: data.phoneNumber.startsWith('+') ? data.phoneNumber : `+${data.phoneNumber}`,
       password: data.password,
-      confirmPassword: data.password,
+      confirmPassword: data.confirmPassword,
     }))
+
     if (registerThunk.fulfilled.match(result)) {
-      toast.success(t('auth.register_success'))
-      navigate('/login', { replace: true })
+      setRegisteredEmail(data.email)
+      dispatch(clearRegisterError())
+    } else {
+      const err = result.payload as string
+      const errorMap: Record<string, string> = {
+        user_exists: t('auth.errors.user_exists'),
+        server_error: t('auth.errors.server_error'),
+      }
+      toast.error(errorMap[err] ?? t('auth.errors.server_error'))
     }
   }
 
@@ -74,87 +116,138 @@ export default function SignUpPage() {
       <Header />
 
       <main className="flex flex-1 items-center justify-center px-4 py-16">
-        <div className="w-full max-w-[371px]">
-          <h1 className="text-3xl font-medium text-foreground">{t('auth.signup_title')}</h1>
-          <p className="mt-2 text-sm text-muted-foreground">{t('auth.signup_subtitle')}</p>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-10 space-y-5" noValidate>
-            <div>
-              <input
-                type="text"
-                placeholder={t('auth.name_placeholder')}
-                autoComplete="name"
-                className={inputCls(!!errors.userName)}
-                {...register('userName')}
-              />
-              {errors.userName && (
-                <p className="mt-1 text-xs text-[#DB4444]">{t('auth.errors.username_required')}</p>
-              )}
+        {registeredEmail ? (
+          <SuccessScreen email={registeredEmail} />
+        ) : (
+          <div className="flex w-full max-w-[440px] flex-col gap-8">
+            {/* Logo + heading */}
+            <div className="flex flex-col items-center gap-3 text-center sm:items-start sm:text-left">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#DB4444]">
+                  <ShoppingCart className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-xl font-bold italic text-foreground">Exclusive</span>
+              </div>
+              <h1 className="text-3xl font-bold text-foreground">{t('auth.signup_title')}</h1>
+              <p className="text-sm text-muted-foreground">{t('auth.signup_subtitle')}</p>
             </div>
 
-            <div>
-              <input
-                type="email"
-                placeholder={t('auth.email_label')}
-                autoComplete="email"
-                className={inputCls(!!errors.email)}
-                {...register('email')}
-              />
-              {errors.email && (
-                <p className="mt-1 text-xs text-[#DB4444]">{t('auth.errors.email_invalid')}</p>
-              )}
-            </div>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+              {/* Username */}
+              <div>
+                <input
+                  type="text"
+                  placeholder={t('auth.name_placeholder')}
+                  autoComplete="name"
+                  className={inputCls(!!errors.userName)}
+                  {...register('userName')}
+                />
+                {errors.userName && (
+                  <p className="mt-1 text-xs text-[#DB4444]">{getErrorMsg(errors.userName.message)}</p>
+                )}
+              </div>
 
-            <div>
-              <input
-                type="tel"
-                placeholder={t('auth.phone')}
-                autoComplete="tel"
-                className={inputCls(!!errors.phoneNumber)}
-                {...register('phoneNumber')}
-              />
-              {errors.phoneNumber && (
-                <p className="mt-1 text-xs text-[#DB4444]">{t('auth.errors.phone_required')}</p>
-              )}
-            </div>
+              {/* Email */}
+              <div>
+                <input
+                  type="email"
+                  placeholder={t('auth.email_label')}
+                  autoComplete="email"
+                  className={inputCls(!!errors.email)}
+                  {...register('email')}
+                />
+                {errors.email && (
+                  <p className="mt-1 text-xs text-[#DB4444]">{getErrorMsg(errors.email.message)}</p>
+                )}
+              </div>
 
-            <div>
-              <input
-                type="password"
-                placeholder={t('auth.password_placeholder')}
-                autoComplete="new-password"
-                className={inputCls(!!errors.password)}
-                {...register('password')}
-              />
-              {errors.password && (
-                <p className="mt-1 text-xs text-[#DB4444]">{t('auth.errors.password_min')}</p>
-              )}
-            </div>
+              {/* Phone */}
+              <div>
+                <input
+                  type="tel"
+                  placeholder={t('auth.phone_placeholder') + ' (e.g. +992xxxxxxxxx)'}
+                  autoComplete="tel"
+                  className={inputCls(!!errors.phoneNumber)}
+                  {...register('phoneNumber')}
+                />
+                {errors.phoneNumber && (
+                  <p className="mt-1 text-xs text-[#DB4444]">{t('auth.errors.phone_required')}</p>
+                )}
+              </div>
 
-            <button
-              type="submit"
-              disabled={registerLoading}
-              className="w-full rounded-[4px] bg-[#DB4444] py-4 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
-            >
-              {registerLoading ? t('auth.registering') : t('auth.create_account')}
-            </button>
+              {/* Password */}
+              <div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder={t('auth.password_placeholder')}
+                    autoComplete="new-password"
+                    className={`${inputCls(!!errors.password)} pr-11`}
+                    {...register('password')}
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    aria-label="Toggle password"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="mt-1 text-xs text-[#DB4444]">{t('auth.errors.password_min')}</p>
+                )}
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  Min 8 chars, uppercase letter and special character required
+                </p>
+              </div>
 
-            <button
-              type="button"
-              className="flex w-full items-center justify-center gap-3 rounded-[4px] border border-border bg-background py-3.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-            >
-              <GoogleIcon />
-              {t('auth.google_signup')}
-            </button>
-          </form>
+              {/* Confirm Password */}
+              <div>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder={t('auth.confirm_password')}
+                    autoComplete="new-password"
+                    className={`${inputCls(!!errors.confirmPassword)} pr-11`}
+                    {...register('confirmPassword')}
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => setShowConfirmPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    aria-label="Toggle confirm password"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {errors.confirmPassword && (
+                  <p className="mt-1 text-xs text-[#DB4444]">{t('auth.errors.passwords_mismatch')}</p>
+                )}
+              </div>
 
-          <p className="mt-8 text-center text-sm text-muted-foreground">
-            {t('auth.has_account')}{' '}
-            <Link to="/login" className="font-medium text-foreground underline underline-offset-4 hover:text-[#DB4444] transition-colors">
-              {t('auth.log_in')}
-            </Link>
-          </p>
-        </div>
+              <button
+                type="submit"
+                disabled={registerLoading}
+                className="w-full rounded-[4px] bg-[#DB4444] py-4 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+              >
+                {registerLoading ? t('auth.registering') : t('auth.create_account')}
+              </button>
+            </form>
+
+            <p className="text-center text-sm text-muted-foreground">
+              {t('auth.has_account')}{' '}
+              <Link
+                to="/login"
+                className="font-semibold text-foreground underline underline-offset-4 hover:text-[#DB4444] transition-colors"
+              >
+                {t('auth.log_in')}
+              </Link>
+            </p>
+          </div>
+        )}
       </main>
 
       <Footer />

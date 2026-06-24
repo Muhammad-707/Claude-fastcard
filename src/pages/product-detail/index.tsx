@@ -23,7 +23,7 @@ function RelatedCard({ product }: { product: Product }) {
   const isAuth = useAppSelector(selectIsAuth)
   const isWishlisted = useAppSelector(selectIsWishlisted(product.id))
   const price = product.hasDiscount ? product.discountPrice ?? product.price : product.price
-  const img = product.image ?? product.images?.[0]?.images ?? product.images?.[0]?.imageName
+  const img = product.image ?? product.images?.[0]?.images ?? product.images?.[0]?.imageName ?? undefined
   const discountPct = product.hasDiscount && product.discountPrice
     ? Math.round((1 - product.discountPrice / product.price) * 100)
     : null
