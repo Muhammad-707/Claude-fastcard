@@ -30,7 +30,7 @@ function WishlistCard({ product, onRemove, onAddToCart }: {
     <div className="group flex flex-col">
       {/* Image area */}
       <div className="relative overflow-hidden rounded-[4px] bg-muted">
-        <Link to={`/products/${product.id}`}>
+        <Link to={`/product/${product.id}`}>
           <img
             src={getImageUrl(img)}
             alt={product.productName}
@@ -93,7 +93,7 @@ function JustForYouCard({ product }: { product: Product }) {
   return (
     <div className="group flex flex-col">
       <div className="relative overflow-hidden rounded-[4px] bg-muted">
-        <Link to={`/products/${product.id}`}>
+        <Link to={`/product/${product.id}`}>
           <img
             src={getImageUrl(img)}
             alt={product.productName}

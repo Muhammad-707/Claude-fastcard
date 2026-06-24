@@ -37,7 +37,7 @@ function RelatedCard({ product }: { product: Product }) {
   return (
     <div className="group relative flex flex-col">
       <div className="relative overflow-hidden rounded-[4px] bg-muted">
-        <Link to={`/products/${product.id}`}>
+        <Link to={`/product/${product.id}`}>
           <img
             src={getImageUrl(img)}
             alt={product.productName}
@@ -65,7 +65,7 @@ function RelatedCard({ product }: { product: Product }) {
         </button>
       </div>
       <div className="mt-2 px-0.5">
-        <Link to={`/products/${product.id}`}>
+        <Link to={`/product/${product.id}`}>
           <p className="line-clamp-1 text-sm font-medium text-foreground hover:text-[#DB4444] transition-colors">
             {product.productName}
           </p>
