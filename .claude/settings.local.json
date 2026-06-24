@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:store-api.softclub.tj)",
+      "Bash(npx create-vite@latest . --template react-ts)",
+      "Bash(yes \"\")",
+      "Bash(echo \"exit: $?\")",
+      "Read(//c/Users/Muhammad/**)",
+      "Bash(npx create-vite@latest exam3-fastcard-temp --template react-ts)",
+      "Skill(update-config)"
+    ]
+  }
+}

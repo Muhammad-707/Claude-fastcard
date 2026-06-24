@@ -1,0 +1,59 @@
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import { useTranslation } from 'react-i18next'
+import { ChevronDown } from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+const LANGS = [
+  { code: 'ru', label: 'RU', flag: '🇷🇺' },
+  { code: 'en', label: 'EN', flag: '🇬🇧' },
+  { code: 'tj', label: 'TJ', flag: '🇹🇯' },
+] as const
+
+export function LangSwitcher({ compact = false }: { compact?: boolean }) {
+  const { i18n } = useTranslation()
+  const current = LANGS.find((l) => l.code === i18n.language) ?? LANGS[0]
+
+  const changeLang = (code: string) => {
+    void i18n.changeLanguage(code)
+    localStorage.setItem('i18nextLng', code)
+  }
+
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <button
+          className={cn(
+            'flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent focus:outline-none',
+            compact && 'px-2 py-1 text-xs'
+          )}
+        >
+          <span>{current.flag}</span>
+          <span>{current.label}</span>
+          <ChevronDown className="h-3 w-3 text-muted-foreground" />
+        </button>
+      </DropdownMenu.Trigger>
+
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          align="end"
+          sideOffset={6}
+          className="z-50 min-w-[100px] overflow-hidden rounded-lg border border-border bg-popover p-1 shadow-lg text-popover-foreground"
+        >
+          {LANGS.map((lang) => (
+            <DropdownMenu.Item
+              key={lang.code}
+              onSelect={() => changeLang(lang.code)}
+              className={cn(
+                'flex cursor-pointer items-center gap-2 rounded-md px-3 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground',
+                lang.code === i18n.language && 'bg-primary/10 text-primary font-medium'
+              )}
+            >
+              <span>{lang.flag}</span>
+              <span>{lang.label}</span>
+            </DropdownMenu.Item>
+          ))}
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  )
+}
