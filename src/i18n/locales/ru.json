@@ -44,6 +44,7 @@
     "password": "Пароль",
     "confirm_password": "Подтвердите пароль",
     "phone": "Номер телефона",
+    "optional": "необязательно",
     "email": "Email или номер телефона",
     "email_label": "Email",
     "email_phone_label": "Email или номер телефона",
@@ -89,11 +90,12 @@
       "password_digits_min": "Минимум 6 цифр",
       "passwords_mismatch": "Пароли не совпадают",
       "phone_required": "Введите номер телефона",
+      "phone_invalid": "Некорректный формат номера (например +992xxxxxxxxx)",
       "email_required": "Введите email",
       "email_invalid": "Некорректный email",
       "invalid_credentials": "Неверное имя или пароль",
       "server_error": "Ошибка сервера. Попробуйте позже.",
-      "user_exists": "Пользователь с таким именем уже существует"
+      "user_exists": "Это имя пользователя или email уже зарегистрированы. Попробуйте другие данные."
     }
   },
   "page404": {
@@ -119,6 +121,7 @@
     "title": "Корзина",
     "add_to_cart": "В корзину",
     "added": "Добавлено в корзину",
+    "added_count": "Добавлено в корзину (Итого: {{count}} в корзине)",
     "empty_title": "Ваша корзина пуста",
     "empty_desc": "Просмотрите наш магазин и найдите что-нибудь для себя",
     "subtotal": "Сумма",
@@ -153,7 +156,10 @@
     "move_all_to_bag": "Всё в корзину",
     "just_for_you": "Специально для вас",
     "see_all": "Смотреть все",
-    "remove": "Удалить из избранного"
+    "remove": "Удалить из избранного",
+    "added": "Товар добавлен в избранное!",
+    "removed": "Удалено из избранного",
+    "go_shopping": "За покупками"
   },
   "checkout": {
     "title": "Оформление",
@@ -175,7 +181,16 @@
     "place_order": "Оформить заказ",
     "order_summary": "Сводка заказа",
     "success_title": "Заказ оформлен!",
-    "success_desc": "Ваш заказ успешно принят."
+    "success_desc": "Ваш заказ успешно принят.",
+    "success_thank_you": "Спасибо за ваш заказ!",
+    "success_order_id": "Номер заказа",
+    "success_total_paid": "Итого оплачено",
+    "success_shipping_time": "Ожидаемая доставка",
+    "success_shipping_days": "3–5 рабочих дней",
+    "success_status": "Статус",
+    "success_status_value": "Подтверждён",
+    "continue_shopping": "Продолжить покупки",
+    "view_orders": "Мои заказы"
   },
   "profile": {
     "title": "Мой профиль",
@@ -200,6 +215,7 @@
     "save_changes": "Сохранить",
     "cancel": "Отмена",
     "change_photo": "Изменить фото",
+    "delete_photo": "Удалить фото",
     "current_password": "Текущий пароль",
     "new_password": "Новый пароль",
     "confirm_new_password": "Подтвердите новый пароль",

@@ -69,6 +69,14 @@ export interface UserProfile {
   image?: string
 }
 
+export interface UpdateProfileDto {
+  firstName: string
+  lastName: string
+  email: string
+  phoneNumber?: string
+  dob?: string
+}
+
 export interface LoginDto { userName: string; password: string }
 export interface RegisterDto {
   userName: string

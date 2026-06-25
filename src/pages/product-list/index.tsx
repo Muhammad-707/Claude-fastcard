@@ -6,17 +6,21 @@ import {
   ChevronDown, ChevronUp,
 } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { fetchProducts, setFilters, setPage, resetFilters } from '@/features/products/model/productsSlice'
+import { fetchProducts, setPage, resetFilters } from '@/features/products/model/productsSlice'
 import { fetchCategories } from '@/features/categories/model/categoriesSlice'
+import { fetchBrands } from '@/features/brands/model/brandsSlice'
 import { ProductCard } from '@/entities/product-card'
 import { NetworkError } from '@/shared/ui/network-error'
 import { EmptyState } from '@/shared/ui/empty-state'
+import { Slider } from '@/shared/ui/slider'
 import { Header } from '@/widgets/header'
 import { Footer } from '@/widgets/footer'
 
 /* ─── Constants ─── */
-const BRANDS   = ['Samsung', 'Apple', 'Huawei', 'Poco', 'Lenovo', 'Sony', 'Dell', 'HP']
-const FEATURES = ['Metallic', 'Plastic cover', '8GB Ram', 'Super power', 'Large Memory', 'Waterproof']
+const PRICE_MIN = 0
+const PRICE_MAX = 5000
+
+const FEATURES   = ['Metallic', 'Plastic cover', '8GB Ram', 'Super power', 'Large Memory', 'Waterproof']
 const CONDITIONS = [
   { value: 'any',         label: 'Any' },
   { value: 'brand-new',   label: 'Brand new' },
@@ -92,72 +96,80 @@ export default function ProductsPage() {
 
   const { list, listStatus, filters, pagination } = useAppSelector((s) => s.products)
   const { items: categories } = useAppSelector((s) => s.categories)
+  const { items: brands } = useAppSelector((s) => s.brands)
 
-  /* ── URL-driven filters ── */
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [minPrice, setMinPrice]       = useState('')
-  const [maxPrice, setMaxPrice]       = useState('')
-
-  /* ── Mock / client-side filters ── */
-  const [selectedBrands,   setSelectedBrands]   = useState<string[]>([])
-  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([])
-  const [condition,        setCondition]         = useState('any')
-  const [selectedRating,   setSelectedRating]    = useState<number | null>(null)
-  const [showAllBrands,    setShowAllBrands]     = useState(false)
-  const [showAllFeatures,  setShowAllFeatures]   = useState(false)
-
-  /* ── Sort ── */
-  const [sortBy, setSortBy] = useState('popularity')
-
+  /* ── URL-driven filter values ── */
   const categoryId    = searchParams.get('categoryId')    ? Number(searchParams.get('categoryId'))    : undefined
   const subcategoryId = searchParams.get('subcategoryId') ? Number(searchParams.get('subcategoryId')) : undefined
+  const brandId       = searchParams.get('brandId')       ? Number(searchParams.get('brandId'))       : undefined
   const productName   = searchParams.get('q') ?? ''
+  const urlMinPrice   = searchParams.get('minPrice')      ? Number(searchParams.get('minPrice'))      : PRICE_MIN
+  const urlMaxPrice   = searchParams.get('maxPrice')      ? Number(searchParams.get('maxPrice'))      : PRICE_MAX
+
+  /* ── Local UI state ── */
+  const [sidebarOpen,      setSidebarOpen]      = useState(false)
+  const [priceRange,       setPriceRange]       = useState<[number, number]>([urlMinPrice, urlMaxPrice])
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([])
+  const [condition,        setCondition]        = useState('any')
+  const [selectedRating,   setSelectedRating]   = useState<number | null>(null)
+  const [showAllBrands,    setShowAllBrands]    = useState(false)
+  const [showAllFeatures,  setShowAllFeatures]  = useState(false)
+  const [sortBy,           setSortBy]           = useState('popularity')
 
   const activeCategory = categories.find((c) => c.id === categoryId)
 
-  useEffect(() => { dispatch(fetchCategories()) }, [dispatch])
-
+  /* ── Initial data fetch ── */
   useEffect(() => {
-    dispatch(fetchProducts({ ...filters, categoryId, subcategoryId, productName: productName || undefined }))
-  }, [dispatch, filters, categoryId, subcategoryId, productName])
+    dispatch(fetchCategories())
+    dispatch(fetchBrands())
+  }, [dispatch])
 
-  /* ── Brand / feature / condition / rating as client-side filter on top of API list ── */
+  /* ── Fetch products whenever URL params or Redux filters change ── */
+  useEffect(() => {
+    const minP = priceRange[0] > PRICE_MIN ? priceRange[0] : undefined
+    const maxP = priceRange[1] < PRICE_MAX ? priceRange[1] : undefined
+    dispatch(fetchProducts({
+      ...filters,
+      categoryId,
+      subcategoryId,
+      brandId,
+      productName: productName || undefined,
+      minPrice: minP,
+      maxPrice: maxP,
+    }))
+  }, [dispatch, filters, categoryId, subcategoryId, brandId, productName, priceRange])
+
+  /* ── Client-side-only filters applied on top of the API result ── */
   const filteredAndSorted = useMemo(() => {
     const base = Array.isArray(list) ? list : []
     let result = [...base]
 
-    /* brand — uses brandName field from API */
-    if (selectedBrands.length > 0) {
-      result = result.filter((p) =>
-        p.brandName && selectedBrands.some((b) =>
-          p.brandName!.toLowerCase().includes(b.toLowerCase())
-        )
-      )
-    }
+    if (condition === 'brand-new')   result = result.filter((_, i) => i % 3 !== 2)
+    else if (condition === 'refurbished') result = result.filter((_, i) => i % 3 === 1)
+    else if (condition === 'old')    result = result.filter((_, i) => i % 3 === 2)
 
-    /* condition (mock — no condition field in API, so use index parity) */
-    if (condition === 'brand-new') {
-      result = result.filter((_, i) => i % 3 !== 2)
-    } else if (condition === 'refurbished') {
-      result = result.filter((_, i) => i % 3 === 1)
-    } else if (condition === 'old') {
-      result = result.filter((_, i) => i % 3 === 2)
-    }
-
-    /* rating (mock — no rating field in API, use id modulo to simulate) */
     if (selectedRating !== null) {
       result = result.filter((p) => ((p.id % 5) + 1) >= selectedRating)
     }
 
-    /* sort */
     if (sortBy === 'price-asc')  result = [...result].sort((a, b) => a.price - b.price)
     if (sortBy === 'price-desc') result = [...result].sort((a, b) => b.price - a.price)
     if (sortBy === 'newest')     result = [...result].reverse()
 
     return result
-  }, [list, selectedBrands, condition, selectedRating, sortBy])
+  }, [list, condition, selectedRating, sortBy])
 
-  /* ── Handlers ── */
+  /* ── URL-update helpers ── */
+  const pushParams = useCallback((patch: Record<string, string | undefined>) => {
+    const next = new URLSearchParams(searchParams)
+    Object.entries(patch).forEach(([k, v]) => {
+      if (v === undefined || v === '') next.delete(k)
+      else next.set(k, v)
+    })
+    setSearchParams(next)
+    dispatch(setPage(1))
+  }, [searchParams, setSearchParams, dispatch])
+
   const handleCategoryClick = useCallback((id: number | undefined) => {
     const next = new URLSearchParams()
     if (id) next.set('categoryId', String(id))
@@ -168,59 +180,72 @@ export default function ProductsPage() {
   }, [dispatch, searchParams, setSearchParams])
 
   const handleSubcategoryClick = useCallback((subId: number) => {
-    const next = new URLSearchParams(searchParams)
-    next.set('subcategoryId', String(subId))
-    setSearchParams(next)
-    dispatch(setPage(1))
+    pushParams({ subcategoryId: String(subId) })
     setSidebarOpen(false)
-  }, [dispatch, searchParams, setSearchParams])
+  }, [pushParams])
 
-  const handlePriceFilter = () => {
-    const newFilters = {
-      minPrice: minPrice ? Number(minPrice) : undefined,
-      maxPrice: maxPrice ? Number(maxPrice) : undefined,
-    }
-    dispatch(setFilters(newFilters))
-    dispatch(fetchProducts({ ...filters, ...newFilters, categoryId, subcategoryId, productName: productName || undefined }))
-  }
+  const handleBrandClick = useCallback((id: number) => {
+    // toggle: clicking the already-selected brand deselects
+    pushParams({ brandId: brandId === id ? undefined : String(id) })
+  }, [pushParams, brandId])
 
-  const handleClearFilters = () => {
-    setMinPrice('')
-    setMaxPrice('')
-    setSelectedBrands([])
+  /* Price slider: commit to URL on pointer-up (onValueCommit) to avoid spamming API */
+  const handlePriceCommit = useCallback((vals: number[]) => {
+    const [min, max] = vals as [number, number]
+    setPriceRange([min, max])
+    pushParams({
+      minPrice: min > PRICE_MIN ? String(min) : undefined,
+      maxPrice: max < PRICE_MAX ? String(max) : undefined,
+    })
+  }, [pushParams])
+
+  const handleClearFilters = useCallback(() => {
+    setPriceRange([PRICE_MIN, PRICE_MAX])
     setSelectedFeatures([])
     setCondition('any')
     setSelectedRating(null)
     dispatch(resetFilters())
     setSearchParams(new URLSearchParams())
-  }
-
-  const toggleBrand = (b: string) =>
-    setSelectedBrands((prev) => prev.includes(b) ? prev.filter((x) => x !== b) : [...prev, b])
+  }, [dispatch, setSearchParams])
 
   const toggleFeature = (f: string) =>
     setSelectedFeatures((prev) => prev.includes(f) ? prev.filter((x) => x !== f) : [...prev, f])
 
   /* ── Derived ── */
-  const activeMockFilters = selectedBrands.length + selectedFeatures.length
+  const mockFilterCount = selectedFeatures.length
     + (condition !== 'any' ? 1 : 0)
     + (selectedRating !== null ? 1 : 0)
 
-  const hasActiveFilters = !!categoryId || !!subcategoryId || !!productName
-    || !!minPrice || !!maxPrice || activeMockFilters > 0
+  const apiFilterCount = (categoryId ? 1 : 0) + (subcategoryId ? 1 : 0) + (productName ? 1 : 0)
+    + (brandId ? 1 : 0)
+    + (priceRange[0] > PRICE_MIN || priceRange[1] < PRICE_MAX ? 1 : 0)
 
-  const totalActiveCount = (categoryId ? 1 : 0) + (subcategoryId ? 1 : 0) + (productName ? 1 : 0)
-    + (minPrice || maxPrice ? 1 : 0) + activeMockFilters
+  const totalActiveCount = apiFilterCount + mockFilterCount
+  const hasActiveFilters = totalActiveCount > 0
 
-  const pages  = Array.from({ length: pagination.totalPage }, (_, i) => i + 1)
-  const visibleBrands   = showAllBrands   ? BRANDS   : BRANDS.slice(0, INITIAL_BRAND_COUNT)
+  const pages = Array.from({ length: pagination.totalPage }, (_, i) => i + 1)
+  const visibleBrands   = showAllBrands   ? brands   : brands.slice(0, INITIAL_BRAND_COUNT)
   const visibleFeatures = showAllFeatures ? FEATURES : FEATURES.slice(0, INITIAL_FEATURE_COUNT)
 
   /* ─────────────────────── SIDEBAR ─────────────────────── */
   const Sidebar = (
     <aside className="w-full lg:w-[230px] lg:shrink-0">
 
-      {/* ── Category ── */}
+      {/* ── Clear all — always at top ── */}
+      {hasActiveFilters && (
+        <button
+          onClick={handleClearFilters}
+          className="mb-4 flex w-full items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-[#DB4444]"
+        >
+          <X className="h-4 w-4 shrink-0" />
+          Clear all filters
+          <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-[#DB4444] text-[10px] font-bold text-white">
+            {totalActiveCount}
+          </span>
+        </button>
+      )}
+
+      {/* ── Category (API-driven) ── */}
       <FilterSection title={t('products.all_categories')}>
         <ul className="space-y-2">
           <li>
@@ -249,7 +274,7 @@ export default function ProductsPage() {
         </ul>
       </FilterSection>
 
-      {/* ── Subcategories ── */}
+      {/* ── Subcategories (shown only when a category with subs is active) ── */}
       {activeCategory && activeCategory.subCategories.length > 0 && (
         <FilterSection title={activeCategory.categoryName}>
           <ul className="space-y-2 pl-2">
@@ -269,35 +294,69 @@ export default function ProductsPage() {
         </FilterSection>
       )}
 
-      {/* ── Brands ── */}
+      {/* ── Brands (API-driven, BrandId → re-fetches from server) ── */}
       <FilterSection title="Brands">
-        <ul className="space-y-2.5">
-          {visibleBrands.map((brand) => (
-            <li key={brand}>
-              <label className="flex cursor-pointer items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={selectedBrands.includes(brand)}
-                  onChange={() => toggleBrand(brand)}
-                  className="h-4 w-4 cursor-pointer rounded border-border accent-[#DB4444]"
-                />
-                <span className="text-base text-foreground">{brand}</span>
-              </label>
-            </li>
-          ))}
-        </ul>
-        {BRANDS.length > INITIAL_BRAND_COUNT && (
-          <button
-            onClick={() => setShowAllBrands((v) => !v)}
-            className="mt-3 text-sm font-medium text-[#DB4444] hover:underline underline-offset-4"
-          >
-            {showAllBrands ? 'See less' : 'See all'}
-          </button>
+        {brands.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        ) : (
+          <>
+            <ul className="space-y-2.5">
+              {visibleBrands.map((brand) => (
+                <li key={brand.id}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={brandId === brand.id}
+                      onChange={() => handleBrandClick(brand.id)}
+                      className="h-4 w-4 cursor-pointer rounded border-border accent-[#DB4444]"
+                    />
+                    <span className="text-base text-foreground">{brand.brandName}</span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+            {brands.length > INITIAL_BRAND_COUNT && (
+              <button
+                onClick={() => setShowAllBrands((v) => !v)}
+                className="mt-3 text-sm font-medium text-[#DB4444] underline-offset-4 hover:underline"
+              >
+                {showAllBrands ? 'See less' : `See all (${brands.length})`}
+              </button>
+            )}
+          </>
         )}
       </FilterSection>
 
-      {/* ── Features ── */}
-      <FilterSection title="Features">
+      {/* ── Price Range — dual-range Slider (MinPrice / MaxPrice → server) ── */}
+      <FilterSection title="Price Range">
+        <div className="space-y-4">
+          {/* Live price display */}
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-medium text-foreground">${priceRange[0].toLocaleString()}</span>
+            <span className="text-muted-foreground">—</span>
+            <span className="font-medium text-foreground">${priceRange[1].toLocaleString()}</span>
+          </div>
+
+          {/* Dual-thumb Radix Slider */}
+          <Slider
+            min={PRICE_MIN}
+            max={PRICE_MAX}
+            step={50}
+            value={priceRange}
+            onValueChange={(vals) => setPriceRange(vals as [number, number])}
+            onValueCommit={handlePriceCommit}
+            className="w-full"
+          />
+
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>${PRICE_MIN}</span>
+            <span>${PRICE_MAX.toLocaleString()}</span>
+          </div>
+        </div>
+      </FilterSection>
+
+      {/* ── Features (Figma placeholder — no matching Swagger param) ── */}
+      <FilterSection title="Features" defaultOpen={false}>
         <ul className="space-y-2.5">
           {visibleFeatures.map((feat) => (
             <li key={feat}>
@@ -316,57 +375,22 @@ export default function ProductsPage() {
         {FEATURES.length > INITIAL_FEATURE_COUNT && (
           <button
             onClick={() => setShowAllFeatures((v) => !v)}
-            className="mt-3 text-sm font-medium text-[#DB4444] hover:underline underline-offset-4"
+            className="mt-3 text-sm font-medium text-[#DB4444] underline-offset-4 hover:underline"
           >
             {showAllFeatures ? 'See less' : 'See all'}
           </button>
         )}
       </FilterSection>
 
-      {/* ── Price Range ── */}
-      <FilterSection title="Price Range">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <div className="flex-1">
-              <p className="mb-1 text-xs text-muted-foreground">Min</p>
-              <input
-                type="number"
-                placeholder="0"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value)}
-                className="w-full rounded-[4px] border border-border bg-background px-3 py-2 text-base text-foreground outline-none focus:border-[#DB4444] placeholder:text-muted-foreground"
-              />
-            </div>
-            <span className="mt-5 shrink-0 text-muted-foreground">—</span>
-            <div className="flex-1">
-              <p className="mb-1 text-xs text-muted-foreground">Max</p>
-              <input
-                type="number"
-                placeholder="999999"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                className="w-full rounded-[4px] border border-border bg-background px-3 py-2 text-base text-foreground outline-none focus:border-[#DB4444] placeholder:text-muted-foreground"
-              />
-            </div>
-          </div>
-          <button
-            onClick={handlePriceFilter}
-            className="w-full rounded-[4px] border border-[#DB4444] py-2 text-base font-medium text-[#DB4444] transition-colors hover:bg-[#DB4444] hover:text-white"
-          >
-            Apply
-          </button>
-        </div>
-      </FilterSection>
-
-      {/* ── Condition ── */}
-      <FilterSection title="Condition">
+      {/* ── Condition (Figma placeholder — no matching Swagger param) ── */}
+      <FilterSection title="Condition" defaultOpen={false}>
         <ul className="space-y-2.5">
           {CONDITIONS.map((c) => (
             <li key={c.value}>
               <label className="flex cursor-pointer items-center gap-3">
                 <div
                   onClick={() => setCondition(c.value)}
-                  className={`flex h-4.5 w-4.5 h-[18px] w-[18px] cursor-pointer items-center justify-center rounded-full border-2 transition-colors ${
+                  className={`flex h-[18px] w-[18px] cursor-pointer items-center justify-center rounded-full border-2 transition-colors ${
                     condition === c.value ? 'border-[#DB4444]' : 'border-muted-foreground'
                   }`}
                 >
@@ -381,8 +405,8 @@ export default function ProductsPage() {
         </ul>
       </FilterSection>
 
-      {/* ── Ratings ── */}
-      <FilterSection title="Ratings">
+      {/* ── Ratings (Figma placeholder — no rating field in API) ── */}
+      <FilterSection title="Ratings" defaultOpen={false}>
         <ul className="space-y-2.5">
           {[5, 4, 3, 2].map((rating) => (
             <li key={rating}>
@@ -399,22 +423,6 @@ export default function ProductsPage() {
           ))}
         </ul>
       </FilterSection>
-
-      {/* ── Clear all ── */}
-      {hasActiveFilters && (
-        <button
-          onClick={handleClearFilters}
-          className="mt-4 flex w-full items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-[#DB4444]"
-        >
-          <X className="h-4 w-4" />
-          Clear all filters
-          {totalActiveCount > 0 && (
-            <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-[#DB4444] text-[10px] font-bold text-white">
-              {totalActiveCount}
-            </span>
-          )}
-        </button>
-      )}
     </aside>
   )
 
@@ -459,13 +467,12 @@ export default function ProductsPage() {
           )}
         </nav>
 
-        {/* ── Toolbar: sort + filter button ── */}
+        {/* ── Toolbar ── */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            {/* Mobile filter button */}
             <button
               onClick={() => setSidebarOpen(true)}
-              className="flex items-center gap-2 rounded-[4px] border border-border px-3 py-2 text-sm text-foreground hover:border-[#DB4444] hover:text-[#DB4444] transition-colors lg:hidden"
+              className="flex items-center gap-2 rounded-[4px] border border-border px-3 py-2 text-sm text-foreground transition-colors hover:border-[#DB4444] hover:text-[#DB4444] lg:hidden"
             >
               <SlidersHorizontal className="h-4 w-4" />
               {t('products.filter')}
@@ -475,22 +482,17 @@ export default function ProductsPage() {
                 </span>
               )}
             </button>
-
             <span className="text-sm text-muted-foreground">
               {filteredAndSorted.length} {t('products.title').toLowerCase()}
-              {activeMockFilters > 0 && (
-                <span className="ml-2 text-xs text-[#DB4444]">({activeMockFilters} mock filters active)</span>
-              )}
             </span>
           </div>
 
-          {/* Sort dropdown */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground hidden sm:inline">Sort by:</span>
+            <span className="hidden text-sm text-muted-foreground sm:inline">Sort by:</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="rounded-[4px] border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-[#DB4444] cursor-pointer"
+              className="cursor-pointer rounded-[4px] border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-[#DB4444]"
             >
               {SORT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -513,7 +515,12 @@ export default function ProductsPage() {
             )}
 
             {listStatus === 'error' && (
-              <NetworkError onRetry={() => dispatch(fetchProducts({ ...filters, categoryId, subcategoryId, productName: productName || undefined }))} />
+              <NetworkError onRetry={() => dispatch(fetchProducts({
+                ...filters, categoryId, subcategoryId, brandId,
+                productName: productName || undefined,
+                minPrice: priceRange[0] > PRICE_MIN ? priceRange[0] : undefined,
+                maxPrice: priceRange[1] < PRICE_MAX ? priceRange[1] : undefined,
+              }))} />
             )}
 
             {listStatus === 'success' && filteredAndSorted.length === 0 && (
@@ -530,12 +537,12 @@ export default function ProductsPage() {
                   {filteredAndSorted.map((p) => <ProductCard key={p.id} product={p} />)}
                 </div>
 
-                {pagination.totalPage > 1 && activeMockFilters === 0 && (
+                {pagination.totalPage > 1 && mockFilterCount === 0 && (
                   <div className="mt-10 flex items-center justify-center gap-2">
                     <button
                       onClick={() => dispatch(setPage(Math.max(1, pagination.pageNumber - 1)))}
                       disabled={pagination.pageNumber === 1}
-                      className="flex h-9 w-9 items-center justify-center rounded-[4px] border border-border text-foreground hover:border-[#DB4444] hover:text-[#DB4444] disabled:opacity-40 transition-colors"
+                      className="flex h-9 w-9 items-center justify-center rounded-[4px] border border-border text-foreground transition-colors hover:border-[#DB4444] hover:text-[#DB4444] disabled:opacity-40"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </button>
@@ -558,7 +565,7 @@ export default function ProductsPage() {
                     <button
                       onClick={() => dispatch(setPage(Math.min(pagination.totalPage, pagination.pageNumber + 1)))}
                       disabled={pagination.pageNumber === pagination.totalPage}
-                      className="flex h-9 w-9 items-center justify-center rounded-[4px] border border-border text-foreground hover:border-[#DB4444] hover:text-[#DB4444] disabled:opacity-40 transition-colors"
+                      className="flex h-9 w-9 items-center justify-center rounded-[4px] border border-border text-foreground transition-colors hover:border-[#DB4444] hover:text-[#DB4444] disabled:opacity-40"
                     >
                       <ChevronRight className="h-4 w-4" />
                     </button>

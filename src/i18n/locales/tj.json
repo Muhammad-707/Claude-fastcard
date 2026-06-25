@@ -44,6 +44,7 @@
     "password": "Рамз",
     "confirm_password": "Тасдиқи рамз",
     "phone": "Рақами телефон",
+    "optional": "ихтиёрӣ",
     "email": "Почта ё рақами телефон",
     "email_label": "Почта",
     "username_placeholder": "Номатонро ворид кунед",
@@ -88,11 +89,12 @@
       "password_digits_min": "Камаш 6 рақам лозим аст",
       "passwords_mismatch": "Рамзҳо мувофиқат намекунанд",
       "phone_required": "Рақами телефонро ворид кунед",
+      "phone_invalid": "Формати нодурусти рақами телефон (масалан +992xxxxxxxxx)",
       "email_required": "Почтаи электрониро ворид кунед",
       "email_invalid": "Почтаи электронии нодуруст",
       "invalid_credentials": "Ном ё рамз нодуруст аст",
       "server_error": "Хатои сервер. Баъдтар кӯшиш кунед.",
-      "user_exists": "Корбар бо ин ном аллакай вуҷуд дорад"
+      "user_exists": "Ин ном ё почтаи электронӣ аллакай қайд шудааст. Маълумоти дигарро истифода баред."
     }
   },
   "page404": {
@@ -118,6 +120,7 @@
     "title": "Сабад",
     "add_to_cart": "Ба сабад",
     "added": "Ба сабад илова шуд",
+    "added_count": "Ба сабад илова шуд (Ҷамъ: {{count}} дар сабад)",
     "empty_title": "Сабади шумо холӣ аст",
     "empty_desc": "Мағозаи моро тамошо кунед ва чизе пайдо кунед",
     "subtotal": "Ҷамъ",
@@ -128,27 +131,48 @@
     "remove": "Нест кардан",
     "clear_cart": "Тозакунии сабад",
     "clear_confirm": "Оё шумо мехоҳед сабадро тоза кунед?",
+    "remove_confirm": "Ин молро аз сабад нест кунед?",
     "coupon_placeholder": "Рамзи купон",
     "apply_coupon": "Татбиқ кардан",
     "shipping": "Расонидан",
-    "free_shipping": "Ройгон"
+    "free_shipping": "Ройгон",
+    "col_product": "Мол",
+    "col_price": "Нарх",
+    "col_quantity": "Миқдор",
+    "col_subtotal": "Ҷамъ",
+    "return_to_shop": "Бозгашт ба мағоза",
+    "update_cart": "Навсозии сабад",
+    "remove_all": "Ҳамаро нест кунед",
+    "cart_total": "Ҷамъи сабад",
+    "proceed_to_checkout": "Ба пардохт гузаред"
   },
   "wishlist": {
     "title": "Рӯйхати хоҳишҳо",
     "empty_title": "Рӯйхати хоҳишҳои шумо холӣ аст",
     "empty_desc": "Молҳои дӯстдоштаро бо зер кардани аломати дил нигоҳ доред",
     "add_all_to_cart": "Ҳама ба сабад",
-    "move_to_cart": "Ба сабад"
+    "move_to_cart": "Ба сабад",
+    "move_all_to_bag": "Ҳама ба сабад",
+    "just_for_you": "Махсус барои шумо",
+    "see_all": "Ҳамаро бубинед",
+    "remove": "Аз дӯстдоштаҳо хориҷ кунед",
+    "added": "Маҳсулот ба дӯстдоштаҳо илова шуд!",
+    "removed": "Аз дӯстдоштаҳо хориҷ шуд",
+    "go_shopping": "Харидан"
   },
   "checkout": {
-    "title": "Маълумоти супоришӣ",
+    "title": "Пардохт",
+    "billing_details": "Маълумот барои таслим",
     "first_name": "Ном",
+    "last_name": "Насаб",
     "company": "Номи ширкат",
     "address": "Суроға",
+    "street_address": "Суроға",
     "apartment": "Квартира, офис (ихтиёрӣ)",
     "city": "Шаҳр",
     "phone": "Телефон",
     "email": "Email",
+    "email_address": "Суроғаи почтаи электронӣ",
     "save_info": "Маълумотро барои харидҳои минбаъда нигоҳ доред",
     "payment_method": "Тарзи пардохт",
     "pay_bank": "Бонк",
@@ -156,7 +180,16 @@
     "place_order": "Фармоиш додан",
     "order_summary": "Хулосаи фармоиш",
     "success_title": "Фармоиш қабул шуд!",
-    "success_desc": "Фармоиши шумо бомуваффақият қабул шуд."
+    "success_desc": "Фармоиши шумо бомуваффақият қабул шуд.",
+    "success_thank_you": "Ташаккур барои фармоиши шумо!",
+    "success_order_id": "Рақами фармоиш",
+    "success_total_paid": "Ҷамъи пардохтшуда",
+    "success_shipping_time": "Тахминии таслим",
+    "success_shipping_days": "3–5 рӯзи корӣ",
+    "success_status": "Ҳолат",
+    "success_status_value": "Тасдиқшуда",
+    "continue_shopping": "Харид кардан",
+    "view_orders": "Фармоишҳои ман"
   },
   "profile": {
     "title": "Профили ман",
@@ -172,6 +205,7 @@
     "save_changes": "Нигоҳ доштан",
     "cancel": "Бекор кардан",
     "change_photo": "Аксро тағйир додан",
+    "delete_photo": "Акси профилро нест кардан",
     "current_password": "Рамзи кунунӣ",
     "new_password": "Рамзи нав",
     "confirm_new_password": "Тасдиқи рамзи нав",
@@ -195,7 +229,8 @@
     "explore_products": "Молҳои мо",
     "explore_subtitle": "Ҳама молҳо",
     "new_arrival": "Нав",
-    "new_arrival_title": "Воридоти нав"
+    "new_arrival_title": "Воридоти нав",
+    "buy_now": "Ҳозир харед"
   },
   "home": {
     "hero_title": "iPhone 14 Series",

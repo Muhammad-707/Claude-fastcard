@@ -64,30 +64,38 @@ export const loginThunk = createAsyncThunk(
 export const registerThunk = createAsyncThunk(
   'auth/register',
   async (data: RegisterDto, { rejectWithValue }) => {
+    // Always include phoneNumber — the server requires the field even when empty.
+    // Omitting it causes ASP.NET Core model binding to throw a 500.
     const serverPayload = {
       userName: data.userName,
       email: data.email,
-      phoneNumber: data.phoneNumber,
       password: data.password,
+      confirmPassword: data.confirmPassword,
+      phoneNumber: data.phoneNumber?.trim() ?? '',
     }
-    console.log('[Register] Payload →', JSON.stringify(serverPayload))
     try {
-      const response = await api.post<ApiResponse<null>>('/Account/register', serverPayload)
-      console.log('[Register] Success', response.status)
+      await api.post<ApiResponse<null>>('/Account/register', serverPayload)
       return true
     } catch (error: unknown) {
       const axiosError = error as {
         response?: { status?: number; data?: ApiResponse<null> }
       }
-      console.error('[Register] Error', axiosError.response?.status, JSON.stringify(axiosError.response?.data))
+      const status = axiosError.response?.status
       const apiErrors = axiosError.response?.data?.errors
+
+      // 500 from this backend means EF threw a unique-constraint violation
+      // (duplicate userName or email) — treat as a conflict, not a true crash
+      if (status === 500) {
+        return rejectWithValue('user_exists')
+      }
+
       if (apiErrors && apiErrors.length > 0) {
-        const msg = apiErrors[0]
-        if (msg.toLowerCase().includes('duplicate') || msg.toLowerCase().includes('already')) {
+        const msg = apiErrors[0].toLowerCase()
+        if (msg.includes('duplicate') || msg.includes('already') || msg.includes('exists')) {
           return rejectWithValue('user_exists')
         }
-        return rejectWithValue('server_error')
       }
+
       return rejectWithValue('server_error')
     }
   }
@@ -145,4 +153,8 @@ export default authSlice.reducer
 export const selectIsAuth = (s: { auth: AuthState }) => !!s.auth.token
 export const selectIsAdmin = (s: { auth: AuthState }) =>
   s.auth.user?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] === 'Admin'
-export const selectUserId = (s: { auth: AuthState }) => s.auth.user?.sid ?? null
+// Try `sid` first (session id used by some ASP.NET Core JWT configurations),
+// fall back to `sub` (standard OIDC subject = user GUID).
+export const selectUserId = (s: { auth: AuthState }) =>
+  s.auth.user?.sid || s.auth.user?.sub || null
+export const selectAuthUser = (s: { auth: AuthState }) => s.auth.user

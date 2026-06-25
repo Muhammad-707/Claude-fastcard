@@ -22,10 +22,12 @@ export const fetchProfile = createAsyncThunk(
 
 export const updateProfile = createAsyncThunk(
   'profile/update',
-  async (formData: FormData, { rejectWithValue }) => {
+  async (form: FormData, { rejectWithValue }) => {
     try {
-      await profileApi.update(formData)
-    } catch {
+      await profileApi.update(form)
+    } catch (err) {
+      const e = err as { response?: { data?: unknown } }
+      console.error('Profile update error:', e.response?.data ?? err)
       return rejectWithValue('network_error')
     }
   },
@@ -34,7 +36,11 @@ export const updateProfile = createAsyncThunk(
 const profileSlice = createSlice({
   name: 'profile',
   initialState,
-  reducers: {},
+  reducers: {
+    resetUpdateStatus(state) {
+      state.updateStatus = 'idle'
+    },
+  },
   extraReducers: (b) => {
     b.addCase(fetchProfile.pending, (s) => { s.status = 'loading' })
      .addCase(fetchProfile.fulfilled, (s, a) => {
@@ -48,4 +54,5 @@ const profileSlice = createSlice({
   },
 })
 
+export const { resetUpdateStatus } = profileSlice.actions
 export default profileSlice.reducer

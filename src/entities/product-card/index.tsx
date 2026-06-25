@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Heart, ShoppingCart, Eye } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { addToCart } from '@/features/cart/model/cartSlice'
+import { addToCart, addToCartLocal } from '@/features/cart/model/cartSlice'
 import { toggleWishlist, selectIsWishlisted } from '@/features/wishlist/model/wishlistSlice'
 import { selectIsAuth } from '@/features/auth/model/authSlice'
 import { getImageUrl, IMAGE_PLACEHOLDER } from '@/shared/lib/image'
@@ -20,6 +20,7 @@ export function ProductCard({ product, showBadge }: ProductCardProps) {
   const navigate = useNavigate()
   const isAuth = useAppSelector(selectIsAuth)
   const wishlisted = useAppSelector(selectIsWishlisted(product.id))
+  const cartItems = useAppSelector((s) => s.cart.items)
 
   const price = product.hasDiscount ? product.discountPrice ?? product.price : product.price
   const image = product.image ?? product.images?.[0]?.images ?? product.images?.[0]?.imageName
@@ -36,8 +37,13 @@ export function ProductCard({ product, showBadge }: ProductCardProps) {
       toast.error(t('auth.login'))
       return
     }
-    dispatch(addToCart({ productId: product.id, product }))
-    toast.success(t('cart.added'))
+    // 1. Synchronous — instant Redux + localStorage update
+    const existing = cartItems.find((i) => i.productId === product.id)
+    const newQty = (existing?.quantity ?? 0) + 1
+    dispatch(addToCartLocal({ productId: product.id, product }))
+    // 2. Background API sync — fire-and-forget
+    void dispatch(addToCart(product.id))
+    toast.success(t('cart.added_count', { count: newQty }))
   }
 
   const handleWishlist = (e: React.MouseEvent) => {
@@ -94,8 +100,8 @@ export function ProductCard({ product, showBadge }: ProductCardProps) {
           <button
             type="button"
             onClick={handleWishlist}
-            className={`flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-md transition-colors sm:h-9 sm:w-9 ${
-              wishlisted ? 'text-[#DB4444]' : 'text-foreground hover:text-[#DB4444]'
+            className={`flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-zinc-800 shadow-md transition-colors sm:h-9 sm:w-9 ${
+              wishlisted ? 'text-[#DB4444]' : 'text-neutral-800 dark:text-neutral-100 hover:text-[#DB4444]'
             }`}
             aria-label="Wishlist"
           >
@@ -104,7 +110,7 @@ export function ProductCard({ product, showBadge }: ProductCardProps) {
           <button
             type="button"
             onClick={handleQuickView}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-md text-foreground transition-colors hover:text-[#DB4444] sm:h-9 sm:w-9"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-zinc-800 shadow-md text-neutral-800 dark:text-neutral-100 transition-colors hover:text-[#DB4444] sm:h-9 sm:w-9"
             aria-label="Quick View"
           >
             <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />

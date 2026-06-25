@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import {
-  Search, Heart, ShoppingCart, Menu, X,
+  Heart, ShoppingCart, Menu, X,
   User, Package, LogOut, ShoppingBag, Bookmark,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -11,7 +11,6 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { selectCartCount } from '@/features/cart/model/cartSlice'
 import { selectWishlistIds } from '@/features/wishlist/model/wishlistSlice'
 import { selectIsAuth, logout } from '@/features/auth/model/authSlice'
-import { fetchProducts, setFilters } from '@/features/products/model/productsSlice'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
+import { SearchBox } from './SearchBox'
 
 const BASE_NAV_LINKS = [
   { key: 'nav.home', to: '/' },
@@ -175,10 +175,7 @@ function MobileUserDropdown() {
 /* ── Header ────────────────────────────────────────────────────────── */
 export function Header() {
   const { t } = useTranslation()
-  const dispatch = useAppDispatch()
-  const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
-  const [query, setQuery] = useState('')
   const cartCount = useAppSelector(selectCartCount)
   const wishlistCount = useAppSelector(selectWishlistIds).length
   const isAuth = useAppSelector(selectIsAuth)
@@ -187,19 +184,6 @@ export function Header() {
     ...BASE_NAV_LINKS,
     ...(isAuth ? [] : [{ key: 'nav.signup' as const, to: '/signup' }]),
   ]
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!query.trim()) return
-    dispatch(setFilters({ productName: query.trim() }))
-    dispatch(fetchProducts({ productName: query.trim(), pageNumber: 1, pageSize: 12 }))
-    navigate('/products')
-    setQuery('')
-    setMenuOpen(false)
-  }
-
-  const menuRef = useRef(menuOpen)
-  useEffect(() => { menuRef.current = menuOpen }, [menuOpen])
 
   return (
     <>
@@ -230,26 +214,8 @@ export function Header() {
           </nav>
 
           <div className="flex items-center gap-3">
-            {/* Search */}
-            <form
-              onSubmit={handleSearch}
-              className="flex items-center gap-2 rounded-[4px] border border-border bg-[#F5F5F5] px-3 py-2 dark:bg-white/5"
-            >
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={t('header.search_placeholder')}
-                className="w-[180px] bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-              />
-              <button
-                type="submit"
-                className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
-                aria-label="Search"
-              >
-                <Search className="h-4 w-4" />
-              </button>
-            </form>
+            {/* Search with live autocomplete */}
+            <SearchBox className="w-[220px]" />
 
             <ThemeToggle />
             <LangSwitcher />
@@ -334,23 +300,9 @@ export function Header() {
               </button>
             </div>
 
-            {/* Search */}
+            {/* Search with live autocomplete */}
             <div className="px-4 py-3">
-              <form
-                onSubmit={handleSearch}
-                className="flex items-center gap-2 rounded-[4px] border border-border bg-muted px-3 py-2"
-              >
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder={t('header.search_placeholder')}
-                  className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                />
-                <button type="submit" className="text-muted-foreground" aria-label="Search">
-                  <Search className="h-4 w-4" />
-                </button>
-              </form>
+              <SearchBox onClose={() => setMenuOpen(false)} />
             </div>
 
             {/* Nav links */}

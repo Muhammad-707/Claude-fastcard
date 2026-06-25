@@ -42,10 +42,10 @@ function CountdownTimer({ seconds: initial }: { seconds: number }) {
       {units.map(([label, val], i) => (
         <div key={label} className="flex items-center">
           <div className="flex flex-col items-center">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground/60">{label}</span>
-            <span className="text-3xl font-bold tabular-nums text-foreground">{pad(val)}</span>
+            <span className="font-semibold text-[10px] text-foreground/60 uppercase tracking-wider">{label}</span>
+            <span className="font-bold tabular-nums text-foreground text-3xl">{pad(val)}</span>
           </div>
-          {i < 2 && <span className="mx-2 self-end pb-0.5 text-2xl font-bold text-[#DB4444]">:</span>}
+          {i < 2 && <span className="self-end mx-2 pb-0.5 font-bold text-[#DB4444] text-2xl">:</span>}
         </div>
       ))}
     </div>
@@ -56,8 +56,8 @@ function CountdownTimer({ seconds: initial }: { seconds: number }) {
 function SectionLabel({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="flex h-8 w-[14px] shrink-0 rounded-[4px] bg-[#DB4444]" />
-      <span className="text-base font-semibold text-[#DB4444]">{label}</span>
+      <span className="flex bg-[#DB4444] rounded-[4px] w-[14px] h-8 shrink-0" />
+      <span className="font-semibold text-[#DB4444] text-base">{label}</span>
     </div>
   )
 }
@@ -66,9 +66,9 @@ function SectionLabel({ label }: { label: string }) {
 function ProductSkeleton() {
   return (
     <div className="animate-pulse">
-      <div className="h-[290px] rounded-[4px] bg-muted" />
-      <div className="mt-3 h-4 w-3/4 rounded bg-muted" />
-      <div className="mt-2 h-3 w-1/2 rounded bg-muted" />
+      <div className="bg-muted rounded-[4px] h-[290px]" />
+      <div className="bg-muted mt-3 rounded w-3/4 h-4" />
+      <div className="bg-muted mt-2 rounded w-1/2 h-3" />
     </div>
   )
 }
@@ -95,28 +95,28 @@ function CategoryIcon({ name, image }: { name: string; image: string }) {
       <img
         src={getImageUrl(image)}
         alt={name}
-        className="h-full w-full object-contain transition-all duration-300 group-hover:brightness-[200]"
+        className="group-hover:brightness-[200] w-full h-full object-contain transition-all duration-300 dark:invert"
       />
     )
   }
   const Icon = getCategoryIcon(name)
   if (Icon) {
-    return <Icon className="h-9 w-9 text-foreground transition-colors duration-300 group-hover:text-white" />
+    return <Icon className="w-9 h-9 text-gray-800 dark:text-white group-hover:text-white transition-colors duration-300" />
   }
   return (
-    <span className="text-3xl transition-all duration-300 group-hover:brightness-[200]">📦</span>
+    <span className="group-hover:brightness-[200] text-3xl transition-all duration-300 dark:brightness-[200]">📦</span>
   )
 }
 
 /* ─── Hero slide visual configs (no text — text lives in i18n) ─── */
 const SLIDE_CONFIGS = [
-  { n: 1, bg: 'from-gray-900 via-gray-800 to-gray-700',      img: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1400&q=85',  cta: '/products' },
-  { n: 2, bg: 'from-blue-950 via-blue-900 to-indigo-900',    img: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1400&q=85',  cta: '/products' },
-  { n: 3, bg: 'from-purple-950 via-purple-900 to-pink-900',  img: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1400&q=85',  cta: '/products' },
-  { n: 4, bg: 'from-emerald-950 via-emerald-900 to-teal-900',img: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=1400&q=85',  cta: '/products' },
-  { n: 5, bg: 'from-orange-950 via-orange-900 to-amber-900', img: 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1400&q=85',  cta: '/products' },
-  { n: 6, bg: 'from-indigo-950 via-indigo-900 to-violet-950',img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1400&q=85',  cta: '/products' },
-  { n: 7, bg: 'from-rose-950 via-rose-900 to-pink-950',      img: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=1400&q=85',  cta: '/products' },
+  { n: 1, bg: 'from-gray-900 via-gray-800 to-gray-700',       img: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1400&q=85',  cta: '/products' },
+  { n: 2, bg: 'from-blue-950 via-blue-900 to-indigo-900',     img: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1400&q=85',  cta: '/products' },
+  { n: 3, bg: 'from-purple-950 via-purple-900 to-pink-900',   img: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1400&q=85',  cta: '/products' },
+  { n: 4, bg: 'from-emerald-950 via-emerald-900 to-teal-900', img: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=1400&q=85',  cta: '/products' },
+  { n: 5, bg: 'from-orange-950 via-orange-900 to-amber-900',  img: 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1400&q=85',  cta: '/products' },
+  { n: 6, bg: 'from-indigo-950 via-indigo-900 to-violet-950', img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1400&q=85',  cta: '/products' },
+  { n: 7, bg: 'from-rose-950 via-rose-900 to-pink-950',       img: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=1400&q=85',  cta: '/products' },
 ] as const
 
 /* ─── Product Swiper Section ─── */
@@ -168,15 +168,69 @@ function ProductSwiperSection({ products, showBadge, prevRef, nextRef }: Product
   )
 }
 
+/* ─── Category Swiper Section ─── */
+interface CategorySwiperProps {
+  categories: import('@/shared/api/types').Category[]
+  prevRef: React.RefObject<HTMLButtonElement | null>
+  nextRef: React.RefObject<HTMLButtonElement | null>
+}
+
+function CategorySwiperSection({ categories, prevRef, nextRef }: CategorySwiperProps) {
+  const swiperRef = useRef<SwiperType | null>(null)
+
+  useEffect(() => {
+    const prev = prevRef.current
+    const next = nextRef.current
+    if (!prev || !next) return
+    const onPrev = () => swiperRef.current?.slidePrev()
+    const onNext = () => swiperRef.current?.slideNext()
+    prev.addEventListener('click', onPrev)
+    next.addEventListener('click', onNext)
+    return () => {
+      prev.removeEventListener('click', onPrev)
+      next.removeEventListener('click', onNext)
+    }
+  }, [prevRef, nextRef])
+
+  return (
+    <Swiper
+      onSwiper={(s) => { swiperRef.current = s }}
+      spaceBetween={30}
+      slidesPerView={2}
+      breakpoints={{
+        768:  { slidesPerView: 4, spaceBetween: 30 },
+        1024: { slidesPerView: 6, spaceBetween: 30 },
+      }}
+      className="mt-10"
+    >
+      {categories.map((cat) => (
+        <SwiperSlide key={cat.id} className="h-auto">
+          <Link
+            to={cat.id > 0 ? `/products?categoryId=${cat.id}` : '/products'}
+            className="group flex h-full flex-col items-center gap-3 rounded-[4px] border border-border bg-background px-3 py-6 text-center transition-all duration-300 ease-in-out hover:border-[#DB4444] hover:bg-[#DB4444] hover:shadow-lg"
+          >
+            <div className="flex h-14 w-14 items-center justify-center">
+              <CategoryIcon name={cat.categoryName} image={cat.categoryImage} />
+            </div>
+            <span className="text-sm font-medium leading-tight text-foreground transition-colors duration-300 group-hover:text-white">
+              {cat.categoryName}
+            </span>
+          </Link>
+        </SwiperSlide>
+      ))}
+    </Swiper>
+  )
+}
+
 /* ─── Nav button helper ─── */
 function NavBtn({ dir, refProp }: { dir: 'prev' | 'next'; refProp: React.RefObject<HTMLButtonElement | null> }) {
   const Icon = dir === 'prev' ? ChevronLeft : ChevronRight
   return (
     <button
       ref={refProp}
-      className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5] text-foreground transition-colors hover:bg-[#DB4444] hover:text-white dark:bg-white/10"
+      className="flex justify-center items-center bg-[#F5F5F5] hover:bg-[#DB4444] dark:bg-white/10 rounded-full w-10 h-10 text-foreground hover:text-white transition-colors"
     >
-      <Icon className="h-5 w-5" />
+      <Icon className="w-5 h-5" />
     </button>
   )
 }
@@ -190,12 +244,12 @@ export default function HomePage() {
   const { list: products, listStatus } = useAppSelector((s) => s.products)
   const { items: categories } = useAppSelector((s) => s.categories)
 
-  const flashPrev    = useRef<HTMLButtonElement>(null)
-  const flashNext    = useRef<HTMLButtonElement>(null)
-  const bestPrev     = useRef<HTMLButtonElement>(null)
-  const bestNext     = useRef<HTMLButtonElement>(null)
-  const explorePrev  = useRef<HTMLButtonElement>(null)
-  const exploreNext  = useRef<HTMLButtonElement>(null)
+  const flashPrev = useRef<HTMLButtonElement>(null)
+  const flashNext = useRef<HTMLButtonElement>(null)
+  const bestPrev  = useRef<HTMLButtonElement>(null)
+  const bestNext  = useRef<HTMLButtonElement>(null)
+  const catPrev   = useRef<HTMLButtonElement>(null)
+  const catNext   = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     dispatch(fetchProducts({ pageNumber: 1, pageSize: 20 }))
@@ -226,27 +280,27 @@ export default function HomePage() {
   const displayCategories = categories.length > 0 ? categories : figmaCategories
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex flex-col bg-background min-h-screen">
       <Header />
 
       {/* ── Hero banner — mt-6 for breathing room below header ── */}
-      <section className="mt-6 border-b border-border">
-        <div className="mx-auto flex max-w-[1280px] flex-col lg:flex-row">
+      <section className="mt-6 border-border border-b">
+        <div className="flex lg:flex-row flex-col mx-auto max-w-[1280px]">
 
           {/* Sidebar categories */}
-          <aside className="hidden w-[220px] shrink-0 border-r border-border py-6 lg:block">
+          <aside className="hidden lg:block py-6 border-border border-r w-[220px] shrink-0">
             <ul className="space-y-0.5 pr-4">
               {displayCategories.map((cat) => (
                 <li key={cat.id} className="group/item relative">
                   <button
                     onClick={() => cat.id > 0 && navigate(`/products?categoryId=${cat.id}`)}
-                    className="flex w-full items-center justify-between rounded-[4px] px-4 py-2 text-base text-foreground transition-colors hover:bg-[#DB4444]/5 hover:text-[#DB4444]"
+                    className="flex justify-between items-center hover:bg-[#DB4444]/5 px-4 py-2 rounded-[4px] w-full text-foreground hover:text-[#DB4444] text-base transition-colors"
                   >
                     <span>{cat.categoryName}</span>
-                    {cat.subCategories.length > 0 && <ChevronRight className="h-3.5 w-3.5 shrink-0" />}
+                    {cat.subCategories.length > 0 && <ChevronRight className="w-3.5 h-3.5 shrink-0" />}
                   </button>
                   {cat.subCategories.length > 0 && (
-                    <div className="pointer-events-none absolute left-full top-0 z-30 ml-1 min-w-[180px] rounded-[4px] border border-border bg-background py-2 opacity-0 shadow-lg transition-all duration-150 group-hover/item:pointer-events-auto group-hover/item:opacity-100">
+                    <div className="top-0 left-full z-30 absolute bg-background opacity-0 group-hover/item:opacity-100 shadow-lg ml-1 py-2 border border-border rounded-[4px] min-w-[180px] transition-all duration-150 pointer-events-none group-hover/item:pointer-events-auto">
                       {cat.subCategories.map((sub) => (
                         <button
                           key={sub.id}
@@ -255,7 +309,7 @@ export default function HomePage() {
                               ? navigate(`/products?categoryId=${cat.id}&subcategoryId=${sub.id}`)
                               : navigate('/products')
                           }
-                          className="block w-full px-4 py-2 text-left text-base text-foreground transition-colors hover:bg-muted hover:text-[#DB4444]"
+                          className="block hover:bg-muted px-4 py-2 w-full text-foreground hover:text-[#DB4444] text-base text-left transition-colors"
                         >
                           {sub.subCategoryName}
                         </button>
@@ -268,7 +322,7 @@ export default function HomePage() {
           </aside>
 
           {/* Hero Swiper — rounded-2xl clips slides to rounded corners */}
-          <div className="relative flex-1 overflow-hidden rounded-2xl">
+          <div className="relative flex-1 rounded-2xl overflow-hidden">
             <Swiper
               modules={[Autoplay, Pagination]}
               autoplay={{ delay: 4500, disableOnInteraction: false }}
@@ -282,21 +336,21 @@ export default function HomePage() {
                     <img
                       src={slide.img}
                       alt={slide.title}
-                      className="absolute inset-0 h-full w-full object-cover opacity-30 mix-blend-luminosity"
+                      className="absolute inset-0 opacity-30 w-full h-full object-cover mix-blend-luminosity"
                     />
                     <div className="absolute inset-0 flex flex-col justify-center px-10 lg:px-14">
-                      <span className="inline-block w-fit rounded bg-[#DB4444]/90 px-3 py-1 text-xs font-bold uppercase tracking-widest text-white">
+                      <span className="inline-block bg-[#DB4444]/90 px-3 py-1 rounded w-fit font-bold text-white text-xs uppercase tracking-widest">
                         {slide.tag}
                       </span>
-                      <h1 className="mt-4 max-w-md text-4xl font-bold leading-tight text-white lg:text-5xl">
+                      <h1 className="mt-4 max-w-md font-bold text-white text-4xl lg:text-5xl leading-tight">
                         {slide.title}
                       </h1>
-                      <p className="mt-3 max-w-xs text-sm text-white/70">{slide.sub}</p>
+                      <p className="mt-3 max-w-xs text-white/70 text-sm">{slide.sub}</p>
                       <Link
                         to={slide.cta}
-                        className="mt-7 inline-flex w-fit items-center gap-2 border-b-2 border-white pb-0.5 text-sm font-bold text-white transition-colors hover:border-[#DB4444] hover:text-[#DB4444]"
+                        className="inline-flex items-center gap-2 mt-7 pb-0.5 border-white hover:border-[#DB4444] border-b-2 w-fit font-bold text-white hover:text-[#DB4444] text-sm transition-colors"
                       >
-                        {t('home.hero_cta')} <ArrowRight className="h-4 w-4" />
+                        {t('home.hero_cta')} <ArrowRight className="w-4 h-4" />
                       </Link>
                     </div>
                   </div>
@@ -307,14 +361,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      <main className="mx-auto w-full max-w-[1280px] px-4 xl:px-0">
+      <main className="mx-auto px-4 xl:px-0 w-full max-w-[1280px]">
 
         {/* ── Flash Sales ── */}
         <section className="mt-16">
           <SectionLabel label={t('products.flash_sales')} />
-          <div className="mt-5 flex flex-wrap items-end justify-between gap-6">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:gap-12">
-              <h2 className="text-4xl font-bold text-foreground">{t('products.flash_sales_title')}</h2>
+          <div className="flex flex-wrap justify-between items-end gap-6 mt-5">
+            <div className="flex sm:flex-row flex-col sm:items-end gap-5 sm:gap-12">
+              <h2 className="font-bold text-foreground text-4xl">{t('products.flash_sales_title')}</h2>
               <CountdownTimer seconds={3 * 3600 + 23 * 60 + 19} />
             </div>
             <div className="flex gap-2">
@@ -324,7 +378,7 @@ export default function HomePage() {
           </div>
 
           {listStatus === 'loading' && (
-            <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="gap-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 mt-8">
               {Array.from({ length: 4 }).map((_, i) => <ProductSkeleton key={i} />)}
             </div>
           )}
@@ -337,59 +391,38 @@ export default function HomePage() {
             <ProductSwiperSection products={flashSales} showBadge="sale" prevRef={flashPrev} nextRef={flashNext} />
           )}
 
-          <div className="mt-10 flex justify-center">
+          <div className="flex justify-center mt-10">
             <Link
               to="/products"
-              className="rounded-[4px] bg-[#DB4444] px-12 py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              className="bg-[#DB4444] hover:opacity-90 px-12 py-3.5 rounded-[4px] font-semibold text-white text-sm transition-opacity"
             >
               {t('home.view_all')}
             </Link>
           </div>
         </section>
 
-        <div className="my-16 h-px bg-border" />
+        <div className="my-16 bg-border h-px" />
 
         {/* ── Browse By Category ── */}
         <section>
           <SectionLabel label={t('products.explore_products')} />
-          <h2 className="mt-5 text-4xl font-bold text-foreground">{t('home.categories_title')}</h2>
-
-          <Swiper
-            className="mt-10"
-            slidesPerView={2.5}
-            spaceBetween={16}
-            breakpoints={{
-              480:  { slidesPerView: 3,   spaceBetween: 16 },
-              640:  { slidesPerView: 4,   spaceBetween: 20 },
-              768:  { slidesPerView: 5,   spaceBetween: 20 },
-              1024: { slidesPerView: 6,   spaceBetween: 24 },
-            }}
-          >
-            {displayCategories.map((cat) => (
-              <SwiperSlide key={cat.id} className="h-auto">
-                <Link
-                  to={cat.id > 0 ? `/products?categoryId=${cat.id}` : '/products'}
-                  className="group flex h-full flex-col items-center gap-3 rounded-[4px] border border-border bg-background px-3 py-6 text-center transition-all duration-300 ease-in-out hover:border-[#DB4444] hover:bg-[#DB4444] hover:shadow-lg"
-                >
-                  <div className="flex h-14 w-14 items-center justify-center">
-                    <CategoryIcon name={cat.categoryName} image={cat.categoryImage} />
-                  </div>
-                  <span className="text-sm font-medium leading-tight text-foreground transition-colors duration-300 group-hover:text-white">
-                    {cat.categoryName}
-                  </span>
-                </Link>
-              </SwiperSlide>
-            ))}
-          </Swiper>
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
+            <h2 className="font-bold text-foreground text-4xl">{t('home.categories_title')}</h2>
+            <div className="flex gap-2">
+              <NavBtn dir="prev" refProp={catPrev} />
+              <NavBtn dir="next" refProp={catNext} />
+            </div>
+          </div>
+          <CategorySwiperSection categories={displayCategories} prevRef={catPrev} nextRef={catNext} />
         </section>
 
-        <div className="my-16 h-px bg-border" />
+        <div className="my-16 bg-border h-px" />
 
         {/* ── Best Selling ── */}
         <section>
           <SectionLabel label={t('products.best_selling')} />
-          <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
-            <h2 className="text-4xl font-bold text-foreground">{t('products.best_selling_title')}</h2>
+          <div className="flex flex-wrap justify-between items-center gap-4 mt-5">
+            <h2 className="font-bold text-foreground text-4xl">{t('products.best_selling_title')}</h2>
             <div className="flex items-center gap-3">
               <div className="flex gap-2">
                 <NavBtn dir="prev" refProp={bestPrev} />
@@ -397,7 +430,7 @@ export default function HomePage() {
               </div>
               <Link
                 to="/products"
-                className="rounded-[4px] bg-[#DB4444] px-8 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                className="bg-[#DB4444] hover:opacity-90 px-8 py-3 rounded-[4px] font-semibold text-white text-sm transition-opacity"
               >
                 {t('home.view_all')}
               </Link>
@@ -407,36 +440,36 @@ export default function HomePage() {
             <ProductSwiperSection products={bestSelling} showBadge="new" prevRef={bestPrev} nextRef={bestNext} />
           )}
           {listStatus === 'loading' && (
-            <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="gap-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 mt-8">
               {Array.from({ length: 4 }).map((_, i) => <ProductSkeleton key={i} />)}
             </div>
           )}
         </section>
 
         {/* ── Enhance Your Music ── */}
-        <div className="my-16 overflow-hidden rounded-2xl bg-black">
-          <div className="flex min-h-[450px] flex-col items-stretch lg:flex-row">
-            <div className="flex flex-1 flex-col justify-center px-10 py-16 lg:px-14 lg:py-20">
-              <p className="text-sm font-bold uppercase tracking-widest text-[#00FF66]">{t('home.music_label')}</p>
-              <h3 className="mt-3 text-3xl font-bold leading-snug text-white lg:text-4xl">
+        <div className="bg-black my-16 rounded-2xl overflow-hidden">
+          <div className="flex lg:flex-row flex-col items-stretch min-h-[450px]">
+            <div className="flex flex-col flex-1 justify-center px-10 lg:px-14 py-16 lg:py-20">
+              <p className="font-bold text-[#00FF66] text-sm uppercase tracking-widest">{t('home.music_label')}</p>
+              <h3 className="mt-3 font-bold text-white text-3xl lg:text-4xl leading-snug">
                 {t('home.music_title')}
               </h3>
-              <div className="mt-8 flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-4 mt-8">
                 {([
                   ['23', t('home.timer_hours_abbr')],
                   ['05', t('home.timer_days_abbr')],
                   ['59', t('home.timer_minutes_abbr')],
                   ['35', t('home.timer_seconds_abbr')],
                 ] as [string, string][]).map(([num, lbl]) => (
-                  <div key={lbl} className="flex min-w-[64px] flex-col items-center rounded-full bg-white px-3 py-2.5">
-                    <span className="text-xl font-bold text-black">{num}</span>
+                  <div key={lbl} className="flex flex-col items-center bg-white px-3 py-2.5 rounded-full min-w-[64px]">
+                    <span className="font-bold text-black text-xl">{num}</span>
                     <span className="text-[10px] text-gray-500">{lbl}</span>
                   </div>
                 ))}
               </div>
               <Link
                 to="/products"
-                className="mt-8 inline-block w-fit rounded-[4px] bg-[#00FF66] px-9 py-3.5 text-sm font-bold text-black transition-opacity hover:opacity-90"
+                className="inline-block bg-[#00FF66] hover:opacity-90 mt-8 px-9 py-3.5 rounded-[4px] w-fit font-bold text-black text-sm transition-opacity"
               >
                 {t('home.hero_cta')}
               </Link>
@@ -445,29 +478,27 @@ export default function HomePage() {
               <img
                 src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=85"
                 alt={t('home.music_img_alt')}
-                className="h-full min-h-[300px] w-full object-cover object-center lg:min-h-[450px]"
+                className="w-full h-full min-h-[300px] lg:min-h-[450px] object-center object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent opacity-60 lg:hidden" />
+              <div className="lg:hidden absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent opacity-60" />
             </div>
           </div>
         </div>
 
-        {/* ── Explore Products ── */}
+        {/* ── Explore Products — static 2×4 grid (Figma spec, max 8 cards) ── */}
         <section>
           <SectionLabel label={t('products.explore_products')} />
-          <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
-            <h2 className="text-4xl font-bold text-foreground">{t('products.explore_subtitle')}</h2>
-            <div className="flex gap-2">
-              <NavBtn dir="prev" refProp={explorePrev} />
-              <NavBtn dir="next" refProp={exploreNext} />
-            </div>
-          </div>
-          {listStatus === 'success' && (
-            <ProductSwiperSection products={safeProducts} prevRef={explorePrev} nextRef={exploreNext} />
-          )}
+          <h2 className="mt-5 font-bold text-foreground text-4xl">{t('products.explore_subtitle')}</h2>
           {listStatus === 'loading' && (
-            <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => <ProductSkeleton key={i} />)}
+            </div>
+          )}
+          {listStatus === 'success' && (
+            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {safeProducts.slice(0, 8).map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
             </div>
           )}
           <div className="mt-10 flex justify-center">
@@ -483,73 +514,73 @@ export default function HomePage() {
         {/* ── New Arrival ── */}
         <section className="mt-16">
           <SectionLabel label={t('products.new_arrival')} />
-          <h2 className="mt-5 text-4xl font-bold text-foreground">{t('products.new_arrival_title')}</h2>
+          <h2 className="mt-5 font-bold text-foreground text-4xl">{t('products.new_arrival_title')}</h2>
 
-          <div className="mt-10 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="mt-10 grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
             {/* Large card */}
-            <div className="relative overflow-hidden rounded-2xl bg-black">
+            <div className="relative bg-black rounded-2xl overflow-hidden">
               <img
                 src="https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=700&q=85"
                 alt={t('home.arrival_ps5')}
-                className="h-[550px] w-full object-cover object-center opacity-70"
+                className="opacity-70 w-full h-[550px] object-center object-cover"
               />
               <div className="absolute bottom-8 left-8 right-8">
-                <p className="text-xl font-bold text-white">{t('home.arrival_ps5')}</p>
-                <p className="mt-1.5 max-w-[260px] text-sm leading-relaxed text-white/70">
+                <p className="font-bold text-white text-xl">{t('home.arrival_ps5')}</p>
+                <p className="mt-1.5 max-w-[260px] text-white/70 text-sm leading-relaxed">
                   {t('home.arrival_ps5_desc')}
                 </p>
                 <Link
                   to="/products"
-                  className="mt-4 inline-flex items-center gap-1.5 border-b-2 border-white pb-0.5 text-sm font-bold text-white transition-colors hover:border-[#DB4444] hover:text-[#DB4444]"
+                  className="inline-flex items-center gap-1.5 mt-4 pb-0.5 border-white hover:border-[#DB4444] border-b-2 font-bold text-white hover:text-[#DB4444] text-sm transition-colors"
                 >
-                  {t('home.hero_cta')} <ArrowRight className="h-4 w-4" />
+                  {t('home.hero_cta')} <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
 
             {/* Right column */}
             <div className="flex flex-col gap-4">
-              <div className="relative overflow-hidden rounded-2xl bg-black">
+              <div className="relative bg-black rounded-2xl overflow-hidden">
                 <img
                   src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=700&q=85"
                   alt={t('home.arrival_womens')}
-                  className="h-[250px] w-full object-cover object-center opacity-70"
+                  className="opacity-70 w-full h-[284px] object-center object-cover"
                 />
                 <div className="absolute bottom-6 left-6">
-                  <p className="text-base font-bold text-white">{t('home.arrival_womens')}</p>
-                  <p className="mt-1 max-w-[200px] text-xs text-white/70">{t('home.arrival_womens_desc')}</p>
-                  <Link to="/products" className="mt-2.5 inline-flex items-center gap-1 border-b border-white pb-0.5 text-xs font-bold text-white transition-colors hover:border-[#DB4444] hover:text-[#DB4444]">
-                    {t('home.hero_cta')} <ArrowRight className="h-3 w-3" />
+                  <p className="font-bold text-white text-base">{t('home.arrival_womens')}</p>
+                  <p className="mt-1 max-w-[200px] text-white/70 text-xs">{t('home.arrival_womens_desc')}</p>
+                  <Link to="/products" className="inline-flex items-center gap-1 mt-2.5 pb-0.5 border-white hover:border-[#DB4444] border-b font-bold text-white hover:text-[#DB4444] text-xs transition-colors">
+                    {t('home.hero_cta')} <ArrowRight className="w-3 h-3" />
                   </Link>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="relative overflow-hidden rounded-2xl bg-black">
+                <div className="relative bg-black rounded-2xl overflow-hidden">
                   <img
                     src="https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&q=85"
                     alt={t('home.arrival_speakers')}
-                    className="h-[248px] w-full object-cover object-center opacity-70"
+                    className="opacity-70 w-full h-[248px] object-center object-cover"
                   />
                   <div className="absolute bottom-5 left-5">
-                    <p className="text-sm font-bold text-white">{t('home.arrival_speakers')}</p>
-                    <p className="mt-1 text-xs text-white/70">{t('home.arrival_speakers_desc')}</p>
-                    <Link to="/products" className="mt-2 inline-flex items-center gap-1 border-b border-white pb-0.5 text-xs font-bold text-white transition-colors hover:border-[#DB4444] hover:text-[#DB4444]">
-                      {t('home.hero_cta')} <ArrowRight className="h-3 w-3" />
+                    <p className="font-bold text-white text-sm">{t('home.arrival_speakers')}</p>
+                    <p className="mt-1 text-white/70 text-xs">{t('home.arrival_speakers_desc')}</p>
+                    <Link to="/products" className="inline-flex items-center gap-1 mt-2 pb-0.5 border-white hover:border-[#DB4444] border-b font-bold text-white hover:text-[#DB4444] text-xs transition-colors">
+                      {t('home.hero_cta')} <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
                 </div>
-                <div className="relative overflow-hidden rounded-2xl bg-black">
+                <div className="relative bg-black rounded-2xl overflow-hidden">
                   <img
-                    src="https://images.unsplash.com/photo-1541643600914-78b084683702?w=400&q=85"
+                    src="https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=600&q=80"
                     alt={t('home.arrival_perfume')}
-                    className="h-[248px] w-full object-cover object-center opacity-70"
+                    className="opacity-70 w-full h-[248px] object-center object-cover"
                   />
                   <div className="absolute bottom-5 left-5">
-                    <p className="text-sm font-bold text-white">{t('home.arrival_perfume')}</p>
-                    <p className="mt-1 text-xs text-white/70">{t('home.arrival_perfume_desc')}</p>
-                    <Link to="/products" className="mt-2 inline-flex items-center gap-1 border-b border-white pb-0.5 text-xs font-bold text-white transition-colors hover:border-[#DB4444] hover:text-[#DB4444]">
-                      {t('home.hero_cta')} <ArrowRight className="h-3 w-3" />
+                    <p className="font-bold text-white text-sm">{t('home.arrival_perfume')}</p>
+                    <p className="mt-1 text-white/70 text-xs">{t('home.arrival_perfume_desc')}</p>
+                    <Link to="/products" className="inline-flex items-center gap-1 mt-2 pb-0.5 border-white hover:border-[#DB4444] border-b font-bold text-white hover:text-[#DB4444] text-xs transition-colors">
+                      {t('home.hero_cta')} <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
                 </div>
@@ -559,19 +590,19 @@ export default function HomePage() {
         </section>
 
         {/* ── Services ── */}
-        <section className="my-16 grid grid-cols-1 gap-8 sm:grid-cols-3">
+        <section className="gap-8 grid grid-cols-1 sm:grid-cols-3 my-16">
           {[
-            { icon: <Truck className="h-10 w-10" />, title: t('home.services_delivery'),   desc: t('home.services_delivery_desc') },
-            { icon: <Headphones className="h-10 w-10" />, title: t('home.services_support'), desc: t('home.services_support_desc') },
-            { icon: <ShieldCheck className="h-10 w-10" />, title: t('home.services_guarantee'), desc: t('home.services_guarantee_desc') },
+            { icon: <Truck className="w-10 h-10" />, title: t('home.services_delivery'),   desc: t('home.services_delivery_desc') },
+            { icon: <Headphones className="w-10 h-10" />, title: t('home.services_support'), desc: t('home.services_support_desc') },
+            { icon: <ShieldCheck className="w-10 h-10" />, title: t('home.services_guarantee'), desc: t('home.services_guarantee_desc') },
           ].map((s) => (
             <div key={s.title} className="flex flex-col items-center gap-4 text-center">
-              <div className="flex h-[80px] w-[80px] items-center justify-center rounded-full bg-[#2D2D2D] text-white ring-[10px] ring-[#C1C1C1]/20">
+              <div className="flex justify-center items-center bg-[#2D2D2D] rounded-full ring-[#C1C1C1]/20 ring-[10px] w-[80px] h-[80px] text-white">
                 {s.icon}
               </div>
               <div>
-                <p className="text-sm font-bold uppercase tracking-widest text-foreground">{s.title}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{s.desc}</p>
+                <p className="font-bold text-foreground text-sm uppercase tracking-widest">{s.title}</p>
+                <p className="mt-1 text-muted-foreground text-sm">{s.desc}</p>
               </div>
             </div>
           ))}

@@ -113,7 +113,7 @@ export default function ContactPage() {
                     <input
                       {...register('name')}
                       placeholder={t('contact.name_placeholder')}
-                      className={`w-full rounded-[4px] border bg-[#F5F5F5] px-4 py-3.5 text-sm text-foreground outline-none placeholder:text-[#8D8D8D] transition-colors focus:border-primary ${
+                      className={`w-full rounded-[4px] border bg-[#F5F5F5] px-4 py-3.5 text-sm text-gray-900 outline-none placeholder:text-gray-500 transition-colors focus:border-primary ${
                         errors.name ? 'border-primary' : 'border-transparent'
                       }`}
                     />
@@ -123,7 +123,7 @@ export default function ContactPage() {
                       {...register('email')}
                       type="email"
                       placeholder={t('contact.email_placeholder')}
-                      className={`w-full rounded-[4px] border bg-[#F5F5F5] px-4 py-3.5 text-sm text-foreground outline-none placeholder:text-[#8D8D8D] transition-colors focus:border-primary ${
+                      className={`w-full rounded-[4px] border bg-[#F5F5F5] px-4 py-3.5 text-sm text-gray-900 outline-none placeholder:text-gray-500 transition-colors focus:border-primary ${
                         errors.email ? 'border-primary' : 'border-transparent'
                       }`}
                     />
@@ -133,7 +133,7 @@ export default function ContactPage() {
                       {...register('phone')}
                       type="tel"
                       placeholder={t('contact.phone_placeholder')}
-                      className="w-full rounded-[4px] border border-transparent bg-[#F5F5F5] px-4 py-3.5 text-sm text-foreground outline-none placeholder:text-[#8D8D8D] transition-colors focus:border-primary"
+                      className="w-full rounded-[4px] border border-transparent bg-[#F5F5F5] px-4 py-3.5 text-sm text-gray-900 outline-none placeholder:text-gray-500 transition-colors focus:border-primary"
                     />
                   </div>
                 </div>
@@ -144,7 +144,7 @@ export default function ContactPage() {
                     {...register('message')}
                     placeholder={t('contact.message_placeholder')}
                     rows={7}
-                    className={`w-full resize-none rounded-[4px] border bg-[#F5F5F5] px-4 py-3.5 text-sm text-foreground outline-none placeholder:text-[#8D8D8D] transition-colors focus:border-primary ${
+                    className={`w-full resize-none rounded-[4px] border bg-[#F5F5F5] px-4 py-3.5 text-sm text-gray-900 outline-none placeholder:text-gray-500 transition-colors focus:border-primary ${
                       errors.message ? 'border-primary' : 'border-transparent'
                     }`}
                   />

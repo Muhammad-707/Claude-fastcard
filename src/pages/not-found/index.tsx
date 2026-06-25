@@ -10,7 +10,7 @@ export default function NotFoundPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
 
-      <main className="flex flex-1 flex-col items-center justify-center px-4 py-20 text-center">
+      <main className="flex flex-1 flex-col items-center justify-center min-h-[60vh] px-4 py-50 text-center">
         <h1 className="text-[80px] font-medium leading-none tracking-tight text-foreground sm:text-[96px] lg:text-[110px]">
           {t('page404.title')}
         </h1>

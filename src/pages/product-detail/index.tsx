@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Heart, Star, Truck, RefreshCw, ShoppingCart } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { fetchProductById, clearCurrent, fetchProducts } from '@/features/products/model/productsSlice'
-import { addToCart } from '@/features/cart/model/cartSlice'
+import { addToCart, addToCartLocal, increaseCart, increaseQtyLocal } from '@/features/cart/model/cartSlice'
 import { toggleWishlist, selectIsWishlisted } from '@/features/wishlist/model/wishlistSlice'
 import { selectIsAuth } from '@/features/auth/model/authSlice'
 import { NetworkError } from '@/shared/ui/network-error'
@@ -22,6 +22,7 @@ function RelatedCard({ product }: { product: Product }) {
   const dispatch = useAppDispatch()
   const isAuth = useAppSelector(selectIsAuth)
   const isWishlisted = useAppSelector(selectIsWishlisted(product.id))
+  const cartItems = useAppSelector((s) => s.cart.items)
   const price = product.hasDiscount ? product.discountPrice ?? product.price : product.price
   const img = product.image ?? product.images?.[0]?.images ?? product.images?.[0]?.imageName ?? undefined
   const discountPct = product.hasDiscount && product.discountPrice
@@ -30,8 +31,11 @@ function RelatedCard({ product }: { product: Product }) {
 
   const handleAddToCart = () => {
     if (!isAuth) { toast.error(t('auth.login')); return }
-    dispatch(addToCart(product.id))
-    toast.success(t('cart.added'))
+    const existing = cartItems.find((i) => i.productId === product.id)
+    const newQty = (existing?.quantity ?? 0) + 1
+    dispatch(addToCartLocal({ productId: product.id, product }))
+    void dispatch(addToCart(product.id))
+    toast.success(t('cart.added_count', { count: newQty }))
   }
 
   return (
@@ -50,14 +54,16 @@ function RelatedCard({ product }: { product: Product }) {
           </span>
         )}
         <button
-          onClick={() => dispatch(toggleWishlist(product.id))}
+          type="button"
+          onClick={(e) => { e.stopPropagation(); dispatch(toggleWishlist(product)) }}
           className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-background shadow"
           aria-label="Wishlist"
         >
           <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-[#DB4444] text-[#DB4444]' : 'text-foreground'}`} />
         </button>
         <button
-          onClick={handleAddToCart}
+          type="button"
+          onClick={(e) => { e.stopPropagation(); handleAddToCart() }}
           className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 bg-black py-2.5 text-xs font-medium text-white opacity-0 transition-opacity group-hover:opacity-100"
         >
           <ShoppingCart className="h-3.5 w-3.5" />
@@ -94,6 +100,7 @@ export default function ProductDetailPage() {
   const { current: product, currentStatus, list } = useAppSelector((s) => s.products)
   const isAuth = useAppSelector(selectIsAuth)
   const wishlisted = useAppSelector(selectIsWishlisted(product?.id ?? 0))
+  const cartItems = useAppSelector((s) => s.cart.items)
 
   const [selectedImg, setSelectedImg] = useState(0)
   const [qty, setQty] = useState(1)
@@ -109,13 +116,23 @@ export default function ProductDetailPage() {
   const handleBuyNow = () => {
     if (!isAuth) { toast.error(t('auth.login')); return }
     if (!product) return
-    for (let i = 0; i < qty; i++) dispatch(addToCart(product.id))
-    toast.success(t('cart.added'))
+    // Synchronous: addToCartLocal (qty=1) + increaseQtyLocal for each extra unit
+    const existing = cartItems.find((i) => i.productId === product.id)
+    dispatch(addToCartLocal({ productId: product.id, product }))
+    for (let i = 1; i < qty; i++) dispatch(increaseQtyLocal(product.id))
+    // Background API sync
+    void dispatch(addToCart(product.id))
+    for (let i = 1; i < qty; i++) void dispatch(increaseCart(product.id))
+    const newTotal = (existing?.quantity ?? 0) + qty
+    toast.success(t('cart.added_count', { count: newTotal }))
   }
 
   const handleWishlist = () => {
     if (!product) return
-    dispatch(toggleWishlist(product.id))
+    dispatch(toggleWishlist(product))
+    toast[wishlisted ? 'info' : 'success'](
+      wishlisted ? t('wishlist.removed') : t('wishlist.added')
+    )
   }
 
   if (currentStatus === 'loading') {

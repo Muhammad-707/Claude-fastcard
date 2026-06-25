@@ -5,7 +5,7 @@ export interface LoginDto {
 
 export interface RegisterDto {
   userName: string
-  phoneNumber: string
+  phoneNumber?: string
   email: string
   password: string
   confirmPassword: string

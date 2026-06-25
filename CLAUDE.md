@@ -269,10 +269,15 @@ VITE_DEFAULT_LANG=ru
 ---
 
 ## 📍 Последний чекпоинт
-- **Текущий статус**: Session 5 завершена. TypeScript 0 ошибок. Lint 0 ошибок.
-- **Что сделано в сессии 5**:
-  1. **ProductCard — навигация через `<Link>`**: Убран `<div onClick={handleCardClick}>`. Теперь `<Link>` оборачивает только `<img>` и название товара. Кнопки (wishlist, quick-view, add-to-cart) — DOM-siblings Link'а, а не его потомки. Клик по кнопке физически не может всплыть в Link и вызвать навигацию. Это полностью устраняет баг "toast исчезает мгновенно".
-  2. **cartSlice — защита от race condition**: В `fetchCart.fulfilled` добавлена защита: перезаписывать `s.items` только если сервер вернул данные (`serverItems.length > 0`) ИЛИ локальное состояние уже пустое. Это предотвращает ситуацию, когда mount-fetch CartPage возвращается раньше, чем завершается API-вызов addToCart, и затирает оптимистичные элементы.
-  3. **Axios — убран глобальный Content-Type**: Удалён `Content-Type: application/json` из `axios.create()`. Axios v1.18 устанавливает его автоматически только при сериализации тела. Из-за глобального заголовка ASP.NET Core получал `Content-Type: application/json` без тела на POST/PUT эндпоинтах корзины и возвращал 400 Bad Request.
-  4. **cartApi — `undefined` вместо `null`**: В `cart.ts` все POST/PUT вызовы без тела изменены с `null` на `undefined`. Это явный сигнал Axios "тела нет".
-- **Следующий шаг**: Протестировать полный флоу: логин → добавление в корзину с Home/Products страниц → переход на /cart → проверить что товары отображаются. Затем — страница /orders или Product List filters/pagination.
+- **Текущий статус (Session 8)**: Live Search Autocomplete в Header + Profile Page rewrites + Product List sidebar с API-фильтрами + Dual-Range Price Slider.
+- **Что сделано в сессии 8**:
+  1. **Profile Page**: полная перезапись — отправка через `multipart/form-data` (PascalCase ключи), аватар в localStorage (base64), Delete Photo, Eye/EyeOff на всех трёх полях пароля. Поле `streetAddress` переименовано в `phoneNumber` (реальный ключ бэкенда).
+  2. **ProductCard dark mode**: исправлены белые кнопки иконок на тёмном фоне — добавлен `dark:bg-zinc-800`.
+  3. **Home Page**: Explore Products заменён статической сеткой 8 карточек (grid-cols-4), добавлены стрелки навигации к Swiper категорий.
+  4. **Brands slice**: создан `src/features/brands/model/brandsSlice.ts` + подключён в store.
+  5. **Product List sidebar**: бренды из API (GET /Brand/get-brands), фильтрация по brandId/minPrice/maxPrice через URL params, кнопка "Clear All Filters" вверху sidebar.
+  6. **Dual-Range Price Slider**: установлен `@radix-ui/react-slider`, создан `src/shared/ui/slider.tsx`, в Product List используется `onValueCommit` для предотвращения спама к API.
+  7. **`src/shared/hooks/useDebounce.ts`**: новый хук debounce (300ms).
+  8. **Live Search Autocomplete**: создан `src/widgets/header/SearchBox.tsx` — debounced поиск, выпадающий список с фото/ценой/категорией, click-outside и Escape для закрытия, навигация на `/products?q=...`. Header очищен от старой логики поиска.
+  9. **Vite fix**: исправлен импорт `cn` в `slider.tsx` (`@/shared/lib/utils` → `@/lib/utils`).
+- **Следующий шаг**: `npm run dev`, проверить поиск в header (напечатать 2+ символа → должен появиться dropdown), проверить фильтры в /products (выбрать бренд, потянуть слайдер цен). Затем — страница /profile (загрузить аватар, сохранить имя). После — Product Detail page или Orders page.

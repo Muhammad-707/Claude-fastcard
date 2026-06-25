@@ -16,9 +16,11 @@ const registerSchema = Yup.object({
   userName: Yup.string().min(2, 'auth.errors.username_required').required('auth.errors.username_required'),
   email: Yup.string().email('auth.errors.email_invalid').required('auth.errors.email_required'),
   phoneNumber: Yup.string()
-    .min(6, 'auth.errors.phone_required')
-    .matches(/^\+?\d[\d\s\-()]{5,}$/, 'auth.errors.phone_required')
-    .required('auth.errors.phone_required'),
+    .transform((v: string) => v.trim())
+    .test('phone-format', 'auth.errors.phone_invalid', (v) => {
+      if (!v) return true
+      return /^\+?\d[\d\s\-()]{5,}$/.test(v)
+    }),
   password: Yup.string()
     .matches(/^\d+$/, 'auth.errors.password_digits_only')
     .min(6, 'auth.errors.password_digits_min')
@@ -78,7 +80,10 @@ export default function SignUpPage() {
     },
     validationSchema: registerSchema,
     onSubmit: async (values) => {
-      const phone = values.phoneNumber.startsWith('+') ? values.phoneNumber : `+${values.phoneNumber}`
+      const rawPhone = values.phoneNumber?.trim()
+      const phone = rawPhone
+        ? rawPhone.startsWith('+') ? rawPhone : `+${rawPhone}`
+        : undefined
       const result = await dispatch(
         registerThunk({
           userName: values.userName,
@@ -164,10 +169,11 @@ export default function SignUpPage() {
               )}
             </div>
 
-            {/* Phone */}
+            {/* Phone (optional) */}
             <div className="space-y-1.5">
               <label htmlFor="phoneNumber" className="block text-sm font-medium text-foreground">
-                {t('auth.phone')}
+                {t('auth.phone')}{' '}
+                <span className="text-xs font-normal text-muted-foreground">({t('auth.optional')})</span>
               </label>
               <Input
                 id="phoneNumber"
@@ -178,7 +184,7 @@ export default function SignUpPage() {
                 {...formik.getFieldProps('phoneNumber')}
               />
               {formik.touched.phoneNumber && formik.errors.phoneNumber && (
-                <p className="text-xs text-[#DB4444]">{t('auth.errors.phone_required')}</p>
+                <p className="text-xs text-[#DB4444]">{t(formik.errors.phoneNumber)}</p>
               )}
             </div>
 
