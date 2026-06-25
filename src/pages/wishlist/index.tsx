@@ -62,7 +62,7 @@ function WishlistCard({ product, onRemove, onAddToCart }: {
           <img
             src={getImageUrl(img)}
             alt={product.productName}
-            className="h-[180px] w-full object-cover object-center transition-transform duration-300 group-hover:scale-105 sm:h-[220px]"
+            className="h-[140px] w-full object-cover object-center transition-transform duration-300 group-hover:scale-105 sm:h-[180px] md:h-[220px]"
             onError={(e) => { (e.target as HTMLImageElement).src = IMAGE_PLACEHOLDER }}
           />
         </Link>

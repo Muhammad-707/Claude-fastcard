@@ -75,7 +75,7 @@ export function ProductCard({ product, showBadge }: ProductCardProps) {
           <img
             src={getImageUrl(image)}
             alt={product.productName}
-            className="h-[180px] w-full object-cover object-center transition-transform duration-300 group-hover:scale-105 sm:h-[220px] lg:h-[260px]"
+            className="h-44 w-full object-contain object-center transition-transform duration-300 group-hover:scale-105 sm:h-[220px] sm:object-cover lg:h-[260px]"
             loading="lazy"
             onError={(e) => {
               ;(e.target as HTMLImageElement).src = IMAGE_PLACEHOLDER

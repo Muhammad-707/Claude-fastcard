@@ -65,7 +65,7 @@ export function SearchBox({ className, onClose }: SearchBoxProps) {
   /* ── Debounced fetch — fires only after 300 ms of no typing ── */
   useEffect(() => {
     const q = debouncedQuery.trim()
-    if (q.length < 2) {
+    if (q.length < 1) {
       setResults([])
       setOpen(false)
       return
@@ -104,7 +104,7 @@ export function SearchBox({ className, onClose }: SearchBoxProps) {
   }
 
   const hasResults     = results.length > 0
-  const showNoResults  = !loading && !hasResults && debouncedQuery.trim().length >= 2
+  const showNoResults  = !loading && !hasResults && debouncedQuery.trim().length >= 1
 
   return (
     <div ref={containerRef} className={`relative ${className ?? ''}`}>

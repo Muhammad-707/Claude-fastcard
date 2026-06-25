@@ -14,6 +14,7 @@ import { NetworkError } from '@/shared/ui/network-error'
 import { EmptyState } from '@/shared/ui/empty-state'
 import { Slider } from '@/shared/ui/slider'
 import { Header } from '@/widgets/header'
+import { SearchBox } from '@/widgets/header/SearchBox'
 import { Footer } from '@/widgets/footer'
 
 /* ─── Constants ─── */
@@ -433,6 +434,11 @@ export default function ProductsPage() {
 
       <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-10 xl:px-0">
 
+        {/* Mobile-only inline search */}
+        <div className="mb-4 block md:hidden">
+          <SearchBox />
+        </div>
+
         {/* Breadcrumb */}
         <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
           <Link to="/" className="transition-colors hover:text-[#DB4444]">{t('nav.home')}</Link>
@@ -468,11 +474,12 @@ export default function ProductsPage() {
         </nav>
 
         {/* ── Toolbar ── */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+        <div className="mb-6 space-y-3">
+          {/* Mobile: equal-width Filter | Sort button row */}
+          <div className="flex gap-2 lg:hidden">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="flex items-center gap-2 rounded-[4px] border border-border px-3 py-2 text-sm text-foreground transition-colors hover:border-[#DB4444] hover:text-[#DB4444] lg:hidden"
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-background py-2.5 text-sm font-medium text-foreground transition-colors hover:border-[#DB4444] hover:text-[#DB4444] dark:border-zinc-700"
             >
               <SlidersHorizontal className="h-4 w-4" />
               {t('products.filter')}
@@ -482,22 +489,39 @@ export default function ProductsPage() {
                 </span>
               )}
             </button>
-            <span className="text-sm text-muted-foreground">
-              {filteredAndSorted.length} {t('products.title').toLowerCase()}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="hidden text-sm text-muted-foreground sm:inline">Sort by:</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="cursor-pointer rounded-[4px] border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-[#DB4444]"
+              className="flex-1 cursor-pointer rounded-lg border border-neutral-200 bg-background px-3 py-2.5 text-sm font-medium text-foreground outline-none focus:border-[#DB4444] dark:border-zinc-700"
             >
               {SORT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
+          </div>
+
+          {/* Mobile: product count below button row */}
+          <p className="text-sm text-muted-foreground lg:hidden">
+            {filteredAndSorted.length} {t('products.title').toLowerCase()}
+          </p>
+
+          {/* Desktop: original layout */}
+          <div className="hidden lg:flex flex-wrap items-center justify-between gap-3">
+            <span className="text-sm text-muted-foreground">
+              {filteredAndSorted.length} {t('products.title').toLowerCase()}
+            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Sort by:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="cursor-pointer rounded-[4px] border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-[#DB4444]"
+              >
+                {SORT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 

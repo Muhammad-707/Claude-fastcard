@@ -17,6 +17,7 @@ import { fetchCategories } from '@/features/categories/model/categoriesSlice'
 import { ProductCard } from '@/entities/product-card'
 import { NetworkError } from '@/shared/ui/network-error'
 import { Header } from '@/widgets/header'
+import { SearchBox } from '@/widgets/header/SearchBox'
 import { Footer } from '@/widgets/footer'
 import { getImageUrl } from '@/shared/lib/image'
 
@@ -150,8 +151,8 @@ function ProductSwiperSection({ products, showBadge, prevRef, nextRef }: Product
     <div className="mt-8">
       <Swiper
         onSwiper={(swiper) => { swiperRef.current = swiper }}
-        spaceBetween={12}
-        slidesPerView={1.4}
+        spaceBetween={10}
+        slidesPerView={2}
         breakpoints={{
           480: { slidesPerView: 2, spaceBetween: 16 },
           640: { slidesPerView: 3, spaceBetween: 20 },
@@ -283,12 +284,32 @@ export default function HomePage() {
     <div className="flex flex-col bg-background min-h-screen">
       <Header />
 
+      {/* Mobile-only search bar — sits right below the header on small screens */}
+      <div className="block md:hidden bg-background px-4 py-3">
+        <SearchBox />
+      </div>
+
+      {/* Mobile-only category chips — horizontally scrollable row */}
+      <div className="block md:hidden bg-background px-4 py-3">
+        <div className="flex gap-2 overflow-x-auto pb-0.5">
+          {displayCategories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => cat.id > 0 && navigate(`/products?categoryId=${cat.id}`)}
+              className="flex-shrink-0 whitespace-nowrap rounded-md bg-neutral-100 px-3 py-1.5 text-xs font-medium text-foreground dark:bg-zinc-800 transition-colors hover:bg-[#DB4444] hover:text-white"
+            >
+              {cat.categoryName}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* ── Hero banner — mt-6 for breathing room below header ── */}
-      <section className="mt-6 border-border border-b">
-        <div className="flex lg:flex-row flex-col mx-auto max-w-[1280px]">
+      <section className="mt-6">
+        <div className="flex lg:flex-row flex-col mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-0">
 
           {/* Sidebar categories */}
-          <aside className="hidden lg:block py-6 border-border border-r w-[220px] shrink-0">
+          <aside className="hidden lg:block py-6 w-[220px] shrink-0">
             <ul className="space-y-0.5 pr-4">
               {displayCategories.map((cat) => (
                 <li key={cat.id} className="group/item relative">
@@ -321,14 +342,14 @@ export default function HomePage() {
             </ul>
           </aside>
 
-          {/* Hero Swiper — rounded-2xl clips slides to rounded corners */}
-          <div className="relative flex-1 rounded-2xl overflow-hidden">
+          {/* Hero Swiper — big rounded on mobile, standard on desktop */}
+          <div className="relative flex-1 rounded-[2.5rem] lg:rounded-[2.1rem] overflow-hidden">
             <Swiper
               modules={[Autoplay, Pagination]}
               autoplay={{ delay: 4500, disableOnInteraction: false }}
               pagination={{ clickable: true }}
               loop
-              className="h-[360px] lg:h-[420px]"
+              className="h-[500px] sm:h-[360px] lg:h-[420px]"
             >
               {heroSlides.map((slide) => (
                 <SwiperSlide key={slide.n}>
@@ -490,12 +511,12 @@ export default function HomePage() {
           <SectionLabel label={t('products.explore_products')} />
           <h2 className="mt-5 font-bold text-foreground text-4xl">{t('products.explore_subtitle')}</h2>
           {listStatus === 'loading' && (
-            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => <ProductSkeleton key={i} />)}
             </div>
           )}
           {listStatus === 'success' && (
-            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {safeProducts.slice(0, 8).map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
