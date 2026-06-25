@@ -3,9 +3,9 @@ import { API_BASE_URL, TOKEN_KEY } from '@/shared/config/env'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // Content-Type is set automatically by Axios when a body is serialized.
+  // Setting it globally causes 400s on no-body endpoints (ASP.NET Core
+  // tries to parse a JSON body that isn't there).
 })
 
 api.interceptors.request.use((config) => {

@@ -269,14 +269,10 @@ VITE_DEFAULT_LANG=ru
 ---
 
 ## 📍 Последний чекпоинт
-- **Текущий статус**: Session 4 завершена. TypeScript 0 ошибок. Lint 0 ошибок.
-- **Что сделано в сессии 4**:
-  1. **Header DropdownMenu**: Заменён Dialog на shadcn DropdownMenu (`src/shared/ui/dropdown-menu.tsx`). Desktop — 3 пункта (Account, My Order, Logout). Mobile — 4 пункта (+ Wishlist). Glassmorphism: `bg-black/80 backdrop-blur-md`.
-  2. **Header mobile layout**: Hamburger слева, FastCart по центру, Cart + User справа. User icon больше не редиректит на /login — всегда открывает dropdown.
-  3. **Register thunk fix**: `confirmPassword` исключён из payload к серверу; добавлен `console.log` для отладки.
-  4. **Login title**: "Log in to Exclusive" → "Log in to FastCart" в en/ru/tj.
-  5. **Home page — Hero**: `mt-6` отступ сверху, swiper container получил `rounded-2xl`.
-  6. **Home page — Categories**: Замена статичного grid на Swiper-карусель. Hover-эффекты: `transition-all duration-300`, `hover:bg-[#DB4444]`, `hover:shadow-lg`, иконки белеют. `getCategoryIcon()` определяет lucide-иконку по названию. Figma-категории: Phones, Computers, SmartWatch, Camera, HeadPhones, Gaming.
-  7. **Home page — Music banner**: `min-h-[450px]`, padding `py-16 lg:py-20`, image `min-h-[450px]`.
-  8. **Home page — i18n**: Все строки (slides, категории, New Arrival, Music banner, таймер) перенесены в t(). Добавлены ключи в en/ru/tj.
-- **Следующий шаг**: Опционально — синхронизация wishlist с API, страница /orders, product detail page.
+- **Текущий статус**: Session 5 завершена. TypeScript 0 ошибок. Lint 0 ошибок.
+- **Что сделано в сессии 5**:
+  1. **ProductCard — навигация через `<Link>`**: Убран `<div onClick={handleCardClick}>`. Теперь `<Link>` оборачивает только `<img>` и название товара. Кнопки (wishlist, quick-view, add-to-cart) — DOM-siblings Link'а, а не его потомки. Клик по кнопке физически не может всплыть в Link и вызвать навигацию. Это полностью устраняет баг "toast исчезает мгновенно".
+  2. **cartSlice — защита от race condition**: В `fetchCart.fulfilled` добавлена защита: перезаписывать `s.items` только если сервер вернул данные (`serverItems.length > 0`) ИЛИ локальное состояние уже пустое. Это предотвращает ситуацию, когда mount-fetch CartPage возвращается раньше, чем завершается API-вызов addToCart, и затирает оптимистичные элементы.
+  3. **Axios — убран глобальный Content-Type**: Удалён `Content-Type: application/json` из `axios.create()`. Axios v1.18 устанавливает его автоматически только при сериализации тела. Из-за глобального заголовка ASP.NET Core получал `Content-Type: application/json` без тела на POST/PUT эндпоинтах корзины и возвращал 400 Bad Request.
+  4. **cartApi — `undefined` вместо `null`**: В `cart.ts` все POST/PUT вызовы без тела изменены с `null` на `undefined`. Это явный сигнал Axios "тела нет".
+- **Следующий шаг**: Протестировать полный флоу: логин → добавление в корзину с Home/Products страниц → переход на /cart → проверить что товары отображаются. Затем — страница /orders или Product List filters/pagination.
