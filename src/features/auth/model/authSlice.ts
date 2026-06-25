@@ -64,13 +64,22 @@ export const loginThunk = createAsyncThunk(
 export const registerThunk = createAsyncThunk(
   'auth/register',
   async (data: RegisterDto, { rejectWithValue }) => {
+    const serverPayload = {
+      userName: data.userName,
+      email: data.email,
+      phoneNumber: data.phoneNumber,
+      password: data.password,
+    }
+    console.log('[Register] Payload →', JSON.stringify(serverPayload))
     try {
-      await api.post<ApiResponse<null>>('/Account/register', data)
+      const response = await api.post<ApiResponse<null>>('/Account/register', serverPayload)
+      console.log('[Register] Success', response.status)
       return true
     } catch (error: unknown) {
       const axiosError = error as {
-        response?: { data?: ApiResponse<null> }
+        response?: { status?: number; data?: ApiResponse<null> }
       }
+      console.error('[Register] Error', axiosError.response?.status, JSON.stringify(axiosError.response?.data))
       const apiErrors = axiosError.response?.data?.errors
       if (apiErrors && apiErrors.length > 0) {
         const msg = apiErrors[0]

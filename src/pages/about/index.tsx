@@ -146,7 +146,7 @@ export default function AboutPage() {
                   <img
                     src={member.img}
                     alt={member.name}
-                    className="h-[320px] w-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
+                    className="h-[440px] w-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
                 <div className="mt-4">

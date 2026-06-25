@@ -269,19 +269,14 @@ VITE_DEFAULT_LANG=ru
 ---
 
 ## 📍 Последний чекпоинт
-- **Текущий статус**: Все задачи из super-prompt выполнены. TypeScript 0 ошибок. Build clean. Pushed to main.
-- **Что сделано в последней сессии**:
-  1. **CRITICAL FIX**: ProductCard — убрал вложенный `<Link>` внутри `<Link>` (hydration error "a cannot descend a"). Теперь вся карточка — `<div onClick>` с отдельными `<button>` для wishlist и quick view.
-  2. **API FIX**: Обнаружил, что API возвращает `data.products` (не `data.data`). Исправлен `extractList()` в productsSlice. Карточки товаров теперь отображаются.
-  3. **API FIX**: Поле изображения в списке — `product.image` (string), в детали — `images[i].images` (не imageName). Исправлено везде.
-  4. **Header**: `fixed top-0 z-50` + glassmorphism `bg-white/80 backdrop-blur-md`. Spacer div автоматически отодвигает контент.
-  5. **Header**: Новый логотип (cart icon + "Exclusive"). Порядок: Search | ThemeToggle | LangSwitcher | Wishlist | Cart | User.
-  6. **Header**: "Sign Up" в навигации скрывается когда пользователь авторизован.
-  7. **Header**: User modal — показывает первую букву имени в красном кружке, пункты Account / My Orders / Logout.
-  8. **Signup**: Добавлено поле подтверждения пароля + strong validation. После регистрации — success screen (API не имеет confirm-code endpoint).
-  9. **Home**: SectionLabel с красной полосой (h-8 w-[14px] bg-[#DB4444]). Все заголовки секций text-4xl font-bold.
-  10. **Home**: Flash Sales / Best Selling / Explore — Swiper горизонтальная карусель с кнопками prev/next.
-  11. **Home**: "Enhance Your Music" — изображение на весь правый блок, текст слева.
-  12. **Home**: New Arrival — PS5 h-[550px], Women h-[250px], Speakers/Perfume h-[248px].
-  13. **Footer**: Обновлён стиль, subscribe с feedback, иконки соцсетей.
-- **Следующий шаг**: Проект готов к презентации. Можно улучшить: загрузку аватара в Profile, wishlist синхронизацию с API (сейчас localStorage), добавить страницы /orders в Profile.
+- **Текущий статус**: Session 4 завершена. TypeScript 0 ошибок. Lint 0 ошибок.
+- **Что сделано в сессии 4**:
+  1. **Header DropdownMenu**: Заменён Dialog на shadcn DropdownMenu (`src/shared/ui/dropdown-menu.tsx`). Desktop — 3 пункта (Account, My Order, Logout). Mobile — 4 пункта (+ Wishlist). Glassmorphism: `bg-black/80 backdrop-blur-md`.
+  2. **Header mobile layout**: Hamburger слева, FastCart по центру, Cart + User справа. User icon больше не редиректит на /login — всегда открывает dropdown.
+  3. **Register thunk fix**: `confirmPassword` исключён из payload к серверу; добавлен `console.log` для отладки.
+  4. **Login title**: "Log in to Exclusive" → "Log in to FastCart" в en/ru/tj.
+  5. **Home page — Hero**: `mt-6` отступ сверху, swiper container получил `rounded-2xl`.
+  6. **Home page — Categories**: Замена статичного grid на Swiper-карусель. Hover-эффекты: `transition-all duration-300`, `hover:bg-[#DB4444]`, `hover:shadow-lg`, иконки белеют. `getCategoryIcon()` определяет lucide-иконку по названию. Figma-категории: Phones, Computers, SmartWatch, Camera, HeadPhones, Gaming.
+  7. **Home page — Music banner**: `min-h-[450px]`, padding `py-16 lg:py-20`, image `min-h-[450px]`.
+  8. **Home page — i18n**: Все строки (slides, категории, New Arrival, Music banner, таймер) перенесены в t(). Добавлены ключи в en/ru/tj.
+- **Следующий шаг**: Опционально — синхронизация wishlist с API, страница /orders, product detail page.

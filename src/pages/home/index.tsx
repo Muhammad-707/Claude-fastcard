@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowRight, ChevronRight, ChevronLeft, Truck, Headphones, ShieldCheck } from 'lucide-react'
+import {
+  ArrowRight, ChevronRight, ChevronLeft,
+  Truck, Headphones, ShieldCheck,
+  Smartphone, Monitor, Watch, Camera, Gamepad2,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, Pagination } from 'swiper/modules'
@@ -19,6 +23,7 @@ import { getImageUrl } from '@/shared/lib/image'
 /* ─── Countdown Timer ─── */
 function CountdownTimer({ seconds: initial }: { seconds: number }) {
   const [left, setLeft] = useState(initial)
+  const { t } = useTranslation()
   useEffect(() => {
     const id = setInterval(() => setLeft((v) => (v > 0 ? v - 1 : 0)), 1000)
     return () => clearInterval(id)
@@ -27,9 +32,14 @@ function CountdownTimer({ seconds: initial }: { seconds: number }) {
   const m = Math.floor((left % 3600) / 60)
   const s = left % 60
   const pad = (n: number) => String(n).padStart(2, '0')
+  const units = [
+    [t('home.timer_hours'),   h],
+    [t('home.timer_minutes'), m],
+    [t('home.timer_seconds'), s],
+  ] as [string, number][]
   return (
     <div className="flex items-center gap-2">
-      {([['Hours', h], ['Minutes', m], ['Seconds', s]] as [string, number][]).map(([label, val], i) => (
+      {units.map(([label, val], i) => (
         <div key={label} className="flex items-center">
           <div className="flex flex-col items-center">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground/60">{label}</span>
@@ -63,33 +73,51 @@ function ProductSkeleton() {
   )
 }
 
-/* ─── Hero slides ─── */
-const HERO_SLIDES = [
-  {
-    bg: 'from-gray-900 via-gray-800 to-gray-700',
-    img: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1400&q=85',
-    tag: 'New Arrival',
-    title: 'iPhone 15 Pro Max',
-    sub: 'Up to 20% off on selected models.',
-    cta: '/products',
-  },
-  {
-    bg: 'from-blue-950 via-blue-900 to-indigo-900',
-    img: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1400&q=85',
-    tag: 'Best Seller',
-    title: 'MacBook Pro M3',
-    sub: 'Power meets portability. Experience the future.',
-    cta: '/products',
-  },
-  {
-    bg: 'from-purple-950 via-purple-900 to-pink-900',
-    img: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1400&q=85',
-    tag: 'Flash Deal',
-    title: 'Nike Air Max 2024',
-    sub: 'Run faster. Jump higher. Live bolder.',
-    cta: '/products',
-  },
-]
+/* ─── Category icon resolver ─── */
+const ICON_MAP = [
+  { match: ['phone', 'mobile', 'смартфон', 'телефон'],         Icon: Smartphone },
+  { match: ['computer', 'laptop', 'компьютер', 'ноутбук'],     Icon: Monitor    },
+  { match: ['watch', 'часы', 'соат'],                          Icon: Watch      },
+  { match: ['camera', 'камера'],                               Icon: Camera     },
+  { match: ['headphone', 'наушник', 'гӯшмонак', 'audio'],     Icon: Headphones },
+  { match: ['gaming', 'game', 'игров', 'бозӣ', 'бозиҳо'],     Icon: Gamepad2   },
+] as const
+
+function getCategoryIcon(name: string) {
+  const n = name.toLowerCase()
+  return ICON_MAP.find((e) => e.match.some((kw) => n.includes(kw)))?.Icon ?? null
+}
+
+/* ─── Category card icon ─── */
+function CategoryIcon({ name, image }: { name: string; image: string }) {
+  if (image) {
+    return (
+      <img
+        src={getImageUrl(image)}
+        alt={name}
+        className="h-full w-full object-contain transition-all duration-300 group-hover:brightness-[200]"
+      />
+    )
+  }
+  const Icon = getCategoryIcon(name)
+  if (Icon) {
+    return <Icon className="h-9 w-9 text-foreground transition-colors duration-300 group-hover:text-white" />
+  }
+  return (
+    <span className="text-3xl transition-all duration-300 group-hover:brightness-[200]">📦</span>
+  )
+}
+
+/* ─── Hero slide visual configs (no text — text lives in i18n) ─── */
+const SLIDE_CONFIGS = [
+  { n: 1, bg: 'from-gray-900 via-gray-800 to-gray-700',      img: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1400&q=85',  cta: '/products' },
+  { n: 2, bg: 'from-blue-950 via-blue-900 to-indigo-900',    img: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1400&q=85',  cta: '/products' },
+  { n: 3, bg: 'from-purple-950 via-purple-900 to-pink-900',  img: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1400&q=85',  cta: '/products' },
+  { n: 4, bg: 'from-emerald-950 via-emerald-900 to-teal-900',img: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=1400&q=85',  cta: '/products' },
+  { n: 5, bg: 'from-orange-950 via-orange-900 to-amber-900', img: 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1400&q=85',  cta: '/products' },
+  { n: 6, bg: 'from-indigo-950 via-indigo-900 to-violet-950',img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1400&q=85',  cta: '/products' },
+  { n: 7, bg: 'from-rose-950 via-rose-900 to-pink-950',      img: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=1400&q=85',  cta: '/products' },
+] as const
 
 /* ─── Product Swiper Section ─── */
 interface ProductSwiperProps {
@@ -122,9 +150,13 @@ function ProductSwiperSection({ products, showBadge, prevRef, nextRef }: Product
     <div className="mt-8">
       <Swiper
         onSwiper={(swiper) => { swiperRef.current = swiper }}
-        spaceBetween={20}
-        slidesPerView={2}
-        breakpoints={{ 640: { slidesPerView: 3 }, 1024: { slidesPerView: 4 } }}
+        spaceBetween={12}
+        slidesPerView={1.4}
+        breakpoints={{
+          480: { slidesPerView: 2, spaceBetween: 16 },
+          640: { slidesPerView: 3, spaceBetween: 20 },
+          1024: { slidesPerView: 4, spaceBetween: 20 },
+        }}
       >
         {products.map((p) => (
           <SwiperSlide key={p.id}>
@@ -158,37 +190,47 @@ export default function HomePage() {
   const { list: products, listStatus } = useAppSelector((s) => s.products)
   const { items: categories } = useAppSelector((s) => s.categories)
 
-  const flashPrev = useRef<HTMLButtonElement>(null)
-  const flashNext = useRef<HTMLButtonElement>(null)
-  const bestPrev = useRef<HTMLButtonElement>(null)
-  const bestNext = useRef<HTMLButtonElement>(null)
-  const explorePrev = useRef<HTMLButtonElement>(null)
-  const exploreNext = useRef<HTMLButtonElement>(null)
+  const flashPrev    = useRef<HTMLButtonElement>(null)
+  const flashNext    = useRef<HTMLButtonElement>(null)
+  const bestPrev     = useRef<HTMLButtonElement>(null)
+  const bestNext     = useRef<HTMLButtonElement>(null)
+  const explorePrev  = useRef<HTMLButtonElement>(null)
+  const exploreNext  = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     dispatch(fetchProducts({ pageNumber: 1, pageSize: 20 }))
     dispatch(fetchCategories())
   }, [dispatch])
 
-  const safeProducts = Array.isArray(products) ? products : []
-  const flashSales = safeProducts.slice(0, 8)
-  const bestSelling = safeProducts.slice(0, 4)
+  /* ── Translated hero slides ── */
+  const heroSlides = SLIDE_CONFIGS.map((s) => ({
+    ...s,
+    tag:   t(`home.slide${s.n}_tag`),
+    title: t(`home.slide${s.n}_title`),
+    sub:   t(`home.slide${s.n}_sub`),
+  }))
 
-  const displayCategories = categories.length > 0 ? categories : [
-    { id: -1, categoryName: 'Fashion', categoryImage: '', subCategories: [{ id: -11, subCategoryName: "Men's" }, { id: -12, subCategoryName: "Women's" }] },
-    { id: -2, categoryName: 'Electronics', categoryImage: '', subCategories: [{ id: -21, subCategoryName: 'Phones' }, { id: -22, subCategoryName: 'Laptops' }] },
-    { id: -3, categoryName: 'Home & Garden', categoryImage: '', subCategories: [] },
-    { id: -4, categoryName: 'Sports', categoryImage: '', subCategories: [] },
-    { id: -5, categoryName: 'Toys', categoryImage: '', subCategories: [] },
-    { id: -6, categoryName: 'Health', categoryImage: '', subCategories: [] },
+  /* ── Figma categories — always shown (merged with API if API has results) ── */
+  const figmaCategories = [
+    { id: -1, categoryName: t('home.cat_phones'),      categoryImage: '', subCategories: [] },
+    { id: -2, categoryName: t('home.cat_computers'),   categoryImage: '', subCategories: [] },
+    { id: -3, categoryName: t('home.cat_smartwatch'),  categoryImage: '', subCategories: [] },
+    { id: -4, categoryName: t('home.cat_camera'),      categoryImage: '', subCategories: [] },
+    { id: -5, categoryName: t('home.cat_headphones'),  categoryImage: '', subCategories: [] },
+    { id: -6, categoryName: t('home.cat_gaming'),      categoryImage: '', subCategories: [] },
   ]
+
+  const safeProducts      = Array.isArray(products) ? products : []
+  const flashSales        = safeProducts.slice(0, 8)
+  const bestSelling       = safeProducts.slice(0, 4)
+  const displayCategories = categories.length > 0 ? categories : figmaCategories
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
 
-      {/* ── Hero banner ── */}
-      <section className="border-b border-border">
+      {/* ── Hero banner — mt-6 for breathing room below header ── */}
+      <section className="mt-6 border-b border-border">
         <div className="mx-auto flex max-w-[1280px] flex-col lg:flex-row">
 
           {/* Sidebar categories */}
@@ -198,7 +240,7 @@ export default function HomePage() {
                 <li key={cat.id} className="group/item relative">
                   <button
                     onClick={() => cat.id > 0 && navigate(`/products?categoryId=${cat.id}`)}
-                    className="flex w-full items-center justify-between rounded-[4px] px-4 py-2 text-sm text-foreground transition-colors hover:bg-[#DB4444]/5 hover:text-[#DB4444]"
+                    className="flex w-full items-center justify-between rounded-[4px] px-4 py-2 text-base text-foreground transition-colors hover:bg-[#DB4444]/5 hover:text-[#DB4444]"
                   >
                     <span>{cat.categoryName}</span>
                     {cat.subCategories.length > 0 && <ChevronRight className="h-3.5 w-3.5 shrink-0" />}
@@ -213,7 +255,7 @@ export default function HomePage() {
                               ? navigate(`/products?categoryId=${cat.id}&subcategoryId=${sub.id}`)
                               : navigate('/products')
                           }
-                          className="block w-full px-4 py-2 text-left text-sm text-foreground transition-colors hover:bg-muted hover:text-[#DB4444]"
+                          className="block w-full px-4 py-2 text-left text-base text-foreground transition-colors hover:bg-muted hover:text-[#DB4444]"
                         >
                           {sub.subCategoryName}
                         </button>
@@ -225,8 +267,8 @@ export default function HomePage() {
             </ul>
           </aside>
 
-          {/* Hero Swiper */}
-          <div className="relative flex-1 overflow-hidden">
+          {/* Hero Swiper — rounded-2xl clips slides to rounded corners */}
+          <div className="relative flex-1 overflow-hidden rounded-2xl">
             <Swiper
               modules={[Autoplay, Pagination]}
               autoplay={{ delay: 4500, disableOnInteraction: false }}
@@ -234,8 +276,8 @@ export default function HomePage() {
               loop
               className="h-[360px] lg:h-[420px]"
             >
-              {HERO_SLIDES.map((slide) => (
-                <SwiperSlide key={slide.title}>
+              {heroSlides.map((slide) => (
+                <SwiperSlide key={slide.n}>
                   <div className={`relative h-full w-full overflow-hidden bg-gradient-to-br ${slide.bg}`}>
                     <img
                       src={slide.img}
@@ -311,32 +353,34 @@ export default function HomePage() {
         <section>
           <SectionLabel label={t('products.explore_products')} />
           <h2 className="mt-5 text-4xl font-bold text-foreground">{t('home.categories_title')}</h2>
-          <div className="mt-10 grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
+
+          <Swiper
+            className="mt-10"
+            slidesPerView={2.5}
+            spaceBetween={16}
+            breakpoints={{
+              480:  { slidesPerView: 3,   spaceBetween: 16 },
+              640:  { slidesPerView: 4,   spaceBetween: 20 },
+              768:  { slidesPerView: 5,   spaceBetween: 20 },
+              1024: { slidesPerView: 6,   spaceBetween: 24 },
+            }}
+          >
             {displayCategories.map((cat) => (
-              <Link
-                key={cat.id}
-                to={cat.id > 0 ? `/products?categoryId=${cat.id}` : '/products'}
-                className="group flex flex-col items-center gap-3 rounded-[4px] border border-border px-3 py-5 text-center transition-all hover:border-[#DB4444] hover:bg-[#DB4444]"
-              >
-                <div className="flex h-14 w-14 items-center justify-center">
-                  {cat.categoryImage ? (
-                    <img
-                      src={getImageUrl(cat.categoryImage)}
-                      alt={cat.categoryName}
-                      className="h-full w-full object-contain transition-all group-hover:brightness-[200]"
-                    />
-                  ) : (
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-2xl transition-colors group-hover:bg-white/20">
-                      📦
-                    </div>
-                  )}
-                </div>
-                <span className="text-xs font-medium leading-tight text-foreground transition-colors group-hover:text-white sm:text-sm">
-                  {cat.categoryName}
-                </span>
-              </Link>
+              <SwiperSlide key={cat.id} className="h-auto">
+                <Link
+                  to={cat.id > 0 ? `/products?categoryId=${cat.id}` : '/products'}
+                  className="group flex h-full flex-col items-center gap-3 rounded-[4px] border border-border bg-background px-3 py-6 text-center transition-all duration-300 ease-in-out hover:border-[#DB4444] hover:bg-[#DB4444] hover:shadow-lg"
+                >
+                  <div className="flex h-14 w-14 items-center justify-center">
+                    <CategoryIcon name={cat.categoryName} image={cat.categoryImage} />
+                  </div>
+                  <span className="text-sm font-medium leading-tight text-foreground transition-colors duration-300 group-hover:text-white">
+                    {cat.categoryName}
+                  </span>
+                </Link>
+              </SwiperSlide>
             ))}
-          </div>
+          </Swiper>
         </section>
 
         <div className="my-16 h-px bg-border" />
@@ -371,16 +415,20 @@ export default function HomePage() {
 
         {/* ── Enhance Your Music ── */}
         <div className="my-16 overflow-hidden rounded-2xl bg-black">
-          <div className="flex flex-col items-stretch lg:flex-row">
-            {/* Text side */}
-            <div className="flex flex-1 flex-col justify-center px-10 py-10 lg:px-14 lg:py-14">
-              <p className="text-sm font-bold uppercase tracking-widest text-[#00FF66]">Categories</p>
+          <div className="flex min-h-[450px] flex-col items-stretch lg:flex-row">
+            <div className="flex flex-1 flex-col justify-center px-10 py-16 lg:px-14 lg:py-20">
+              <p className="text-sm font-bold uppercase tracking-widest text-[#00FF66]">{t('home.music_label')}</p>
               <h3 className="mt-3 text-3xl font-bold leading-snug text-white lg:text-4xl">
-                Enhance Your Music<br />Experience
+                {t('home.music_title')}
               </h3>
               <div className="mt-8 flex flex-wrap gap-4">
-                {[['23', 'Hours'], ['05', 'Days'], ['59', 'Minutes'], ['35', 'Seconds']].map(([num, lbl]) => (
-                  <div key={lbl} className="flex min-w-[64px] flex-col items-center rounded-full bg-white py-2.5 px-3">
+                {([
+                  ['23', t('home.timer_hours_abbr')],
+                  ['05', t('home.timer_days_abbr')],
+                  ['59', t('home.timer_minutes_abbr')],
+                  ['35', t('home.timer_seconds_abbr')],
+                ] as [string, string][]).map(([num, lbl]) => (
+                  <div key={lbl} className="flex min-w-[64px] flex-col items-center rounded-full bg-white px-3 py-2.5">
                     <span className="text-xl font-bold text-black">{num}</span>
                     <span className="text-[10px] text-gray-500">{lbl}</span>
                   </div>
@@ -393,12 +441,11 @@ export default function HomePage() {
                 {t('home.hero_cta')}
               </Link>
             </div>
-            {/* Image side */}
             <div className="relative flex-1">
               <img
                 src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=85"
-                alt="JBL Speaker"
-                className="h-full min-h-[300px] w-full object-cover object-center lg:min-h-[360px]"
+                alt={t('home.music_img_alt')}
+                className="h-full min-h-[300px] w-full object-cover object-center lg:min-h-[450px]"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent opacity-60 lg:hidden" />
             </div>
@@ -439,17 +486,17 @@ export default function HomePage() {
           <h2 className="mt-5 text-4xl font-bold text-foreground">{t('products.new_arrival_title')}</h2>
 
           <div className="mt-10 grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {/* Large card — PS5 */}
+            {/* Large card */}
             <div className="relative overflow-hidden rounded-2xl bg-black">
               <img
                 src="https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=700&q=85"
-                alt="PlayStation 5"
+                alt={t('home.arrival_ps5')}
                 className="h-[550px] w-full object-cover object-center opacity-70"
               />
               <div className="absolute bottom-8 left-8 right-8">
-                <p className="text-xl font-bold text-white">PlayStation 5</p>
+                <p className="text-xl font-bold text-white">{t('home.arrival_ps5')}</p>
                 <p className="mt-1.5 max-w-[260px] text-sm leading-relaxed text-white/70">
-                  Black and White version of the PS5 coming out on sale.
+                  {t('home.arrival_ps5_desc')}
                 </p>
                 <Link
                   to="/products"
@@ -460,36 +507,34 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right column — 3 smaller cards stacked */}
+            {/* Right column */}
             <div className="flex flex-col gap-4">
-              {/* Women's collection */}
               <div className="relative overflow-hidden rounded-2xl bg-black">
                 <img
                   src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=700&q=85"
-                  alt="Women's Collections"
+                  alt={t('home.arrival_womens')}
                   className="h-[250px] w-full object-cover object-center opacity-70"
                 />
                 <div className="absolute bottom-6 left-6">
-                  <p className="text-base font-bold text-white">Women's Collections</p>
-                  <p className="mt-1 max-w-[200px] text-xs text-white/70">Featured woman collections that give you another vibe.</p>
-                  <Link to="/products" className="mt-2.5 inline-flex items-center gap-1 border-b border-white pb-0.5 text-xs font-bold text-white hover:border-[#DB4444] hover:text-[#DB4444] transition-colors">
+                  <p className="text-base font-bold text-white">{t('home.arrival_womens')}</p>
+                  <p className="mt-1 max-w-[200px] text-xs text-white/70">{t('home.arrival_womens_desc')}</p>
+                  <Link to="/products" className="mt-2.5 inline-flex items-center gap-1 border-b border-white pb-0.5 text-xs font-bold text-white transition-colors hover:border-[#DB4444] hover:text-[#DB4444]">
                     {t('home.hero_cta')} <ArrowRight className="h-3 w-3" />
                   </Link>
                 </div>
               </div>
 
-              {/* Two small cards */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="relative overflow-hidden rounded-2xl bg-black">
                   <img
-                    src="https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&q=85"
-                    alt="Speakers"
+                    src="https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&q=85"
+                    alt={t('home.arrival_speakers')}
                     className="h-[248px] w-full object-cover object-center opacity-70"
                   />
                   <div className="absolute bottom-5 left-5">
-                    <p className="text-sm font-bold text-white">Speakers</p>
-                    <p className="mt-1 text-xs text-white/70">Amazon wireless speakers</p>
-                    <Link to="/products" className="mt-2 inline-flex items-center gap-1 border-b border-white pb-0.5 text-xs font-bold text-white hover:border-[#DB4444] hover:text-[#DB4444] transition-colors">
+                    <p className="text-sm font-bold text-white">{t('home.arrival_speakers')}</p>
+                    <p className="mt-1 text-xs text-white/70">{t('home.arrival_speakers_desc')}</p>
+                    <Link to="/products" className="mt-2 inline-flex items-center gap-1 border-b border-white pb-0.5 text-xs font-bold text-white transition-colors hover:border-[#DB4444] hover:text-[#DB4444]">
                       {t('home.hero_cta')} <ArrowRight className="h-3 w-3" />
                     </Link>
                   </div>
@@ -497,13 +542,13 @@ export default function HomePage() {
                 <div className="relative overflow-hidden rounded-2xl bg-black">
                   <img
                     src="https://images.unsplash.com/photo-1541643600914-78b084683702?w=400&q=85"
-                    alt="Perfume"
+                    alt={t('home.arrival_perfume')}
                     className="h-[248px] w-full object-cover object-center opacity-70"
                   />
                   <div className="absolute bottom-5 left-5">
-                    <p className="text-sm font-bold text-white">Perfume</p>
-                    <p className="mt-1 text-xs text-white/70">GUCCI INTENSE OUD EDP</p>
-                    <Link to="/products" className="mt-2 inline-flex items-center gap-1 border-b border-white pb-0.5 text-xs font-bold text-white hover:border-[#DB4444] hover:text-[#DB4444] transition-colors">
+                    <p className="text-sm font-bold text-white">{t('home.arrival_perfume')}</p>
+                    <p className="mt-1 text-xs text-white/70">{t('home.arrival_perfume_desc')}</p>
+                    <Link to="/products" className="mt-2 inline-flex items-center gap-1 border-b border-white pb-0.5 text-xs font-bold text-white transition-colors hover:border-[#DB4444] hover:text-[#DB4444]">
                       {t('home.hero_cta')} <ArrowRight className="h-3 w-3" />
                     </Link>
                   </div>
@@ -516,7 +561,7 @@ export default function HomePage() {
         {/* ── Services ── */}
         <section className="my-16 grid grid-cols-1 gap-8 sm:grid-cols-3">
           {[
-            { icon: <Truck className="h-10 w-10" />, title: t('home.services_delivery'), desc: t('home.services_delivery_desc') },
+            { icon: <Truck className="h-10 w-10" />, title: t('home.services_delivery'),   desc: t('home.services_delivery_desc') },
             { icon: <Headphones className="h-10 w-10" />, title: t('home.services_support'), desc: t('home.services_support_desc') },
             { icon: <ShieldCheck className="h-10 w-10" />, title: t('home.services_guarantee'), desc: t('home.services_guarantee_desc') },
           ].map((s) => (

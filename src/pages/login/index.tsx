@@ -1,60 +1,21 @@
-import { forwardRef, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { useFormik } from 'formik'
+import * as Yup from 'yup'
 import { Eye, EyeOff } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { loginThunk, clearLoginError } from '@/features/auth/model/authSlice'
+import { Input } from '@/shared/ui/input'
 import { Header } from '@/widgets/header'
 import { Footer } from '@/widgets/footer'
 
-const schema = z.object({
-  userName: z.string().min(1, 'errors.username_required'),
-  password: z.string().min(6, 'errors.password_min'),
-})
-type FormValues = z.infer<typeof schema>
-
-interface FloatingInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  id: string
-  label: string
-  hasError?: boolean
-  showToggle?: boolean
-  onToggle?: () => void
-  showValue?: boolean
-}
-
-const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(function FloatingInput(
-  { id, label, type = 'text', hasError, showToggle, onToggle, showValue, ...props },
-  ref
-) {
-  return (
-    <div className={`relative rounded-[4px] border bg-background transition-colors focus-within:border-foreground ${hasError ? 'border-[#DB4444]' : 'border-border'}`}>
-      <label htmlFor={id} className="absolute left-3 top-1.5 pointer-events-none text-[10px] leading-none text-muted-foreground">
-        {label}
-      </label>
-      <input
-        ref={ref}
-        id={id}
-        type={showToggle ? (showValue ? 'text' : 'password') : type}
-        className="block w-full bg-transparent pb-3 pl-3 pr-10 pt-5 text-sm text-foreground outline-none"
-        {...props}
-      />
-      {showToggle && (
-        <button
-          type="button"
-          onClick={onToggle}
-          tabIndex={-1}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-          aria-label="Toggle password visibility"
-        >
-          {showValue ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-        </button>
-      )}
-    </div>
-  )
+const loginSchema = Yup.object({
+  userName: Yup.string().required('auth.errors.username_required'),
+  password: Yup.string()
+    .min(6, 'auth.errors.password_min')
+    .required('auth.errors.password_required'),
 })
 
 export default function LoginPage() {
@@ -63,10 +24,6 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const { loginLoading, loginError, token } = useAppSelector((s) => s.auth)
   const [showPassword, setShowPassword] = useState(false)
-
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-  })
 
   useEffect(() => {
     if (token) navigate('/', { replace: true })
@@ -83,51 +40,79 @@ export default function LoginPage() {
     }
   }, [loginError, t, dispatch])
 
-  const onSubmit = (data: FormValues) => {
-    dispatch(loginThunk(data))
-  }
+  const formik = useFormik({
+    initialValues: { userName: '', password: '' },
+    validationSchema: loginSchema,
+    onSubmit: (values) => {
+      void dispatch(loginThunk(values))
+    },
+  })
+
+  const fieldCls = (name: 'userName' | 'password') =>
+    `h-12 rounded-[6px] px-4 focus-visible:ring-0 focus-visible:ring-offset-0 ${
+      formik.touched[name] && formik.errors[name]
+        ? 'border-[#DB4444] focus-visible:border-[#DB4444]'
+        : 'border-border focus-visible:border-foreground'
+    }`
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
 
       <main className="flex flex-1 items-center justify-center px-4 py-16">
-        <div className="w-full max-w-[371px]">
-          <h1 className="text-3xl font-medium text-foreground">{t('auth.login_title')}</h1>
+        <div className="w-full max-w-[400px]">
+          <h1 className="text-3xl font-bold text-foreground">{t('auth.login_title')}</h1>
           <p className="mt-2 text-sm text-muted-foreground">{t('auth.login_subtitle')}</p>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-10 space-y-5" noValidate>
-            <div>
-              <FloatingInput
+          <form onSubmit={formik.handleSubmit} className="mt-10 space-y-5" noValidate>
+            {/* Username / Email */}
+            <div className="space-y-1.5">
+              <label htmlFor="userName" className="block text-sm font-medium text-foreground">
+                {t('auth.email_phone_label')}
+              </label>
+              <Input
                 id="userName"
-                label={t('auth.email_phone_label')}
                 type="text"
                 autoComplete="username"
-                hasError={!!errors.userName}
-                {...register('userName')}
+                placeholder={t('auth.email_phone_placeholder')}
+                className={fieldCls('userName')}
+                {...formik.getFieldProps('userName')}
               />
-              {errors.userName && (
-                <p className="mt-1 text-xs text-[#DB4444]">{t('auth.errors.username_required')}</p>
+              {formik.touched.userName && formik.errors.userName && (
+                <p className="text-xs text-[#DB4444]">{t(formik.errors.userName)}</p>
               )}
             </div>
 
-            <div>
-              <FloatingInput
-                id="password"
-                label={t('auth.password_label')}
-                hasError={!!errors.password}
-                showToggle
-                onToggle={() => setShowPassword((v) => !v)}
-                showValue={showPassword}
-                autoComplete="current-password"
-                {...register('password')}
-              />
-              {errors.password && (
-                <p className="mt-1 text-xs text-[#DB4444]">{t('auth.errors.password_min')}</p>
+            {/* Password */}
+            <div className="space-y-1.5">
+              <label htmlFor="password" className="block text-sm font-medium text-foreground">
+                {t('auth.password_label')}
+              </label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  placeholder={t('auth.password_placeholder')}
+                  className={`${fieldCls('password')} pr-11`}
+                  {...formik.getFieldProps('password')}
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Toggle password visibility"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {formik.touched.password && formik.errors.password && (
+                <p className="text-xs text-[#DB4444]">{t(formik.errors.password)}</p>
               )}
             </div>
 
-            <div className="text-center">
+            <div className="flex justify-end">
               <button type="button" className="text-sm text-[#DB4444] hover:underline underline-offset-4">
                 {t('auth.forgot_password')}
               </button>
@@ -136,7 +121,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loginLoading}
-              className="w-full rounded-[4px] bg-[#DB4444] py-4 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+              className="w-full rounded-[6px] bg-[#DB4444] py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
             >
               {loginLoading ? t('auth.logging_in') : t('auth.log_in')}
             </button>
@@ -144,7 +129,10 @@ export default function LoginPage() {
 
           <p className="mt-8 text-center text-sm text-muted-foreground">
             {t('auth.no_account')}{' '}
-            <Link to="/signup" className="font-medium text-foreground underline underline-offset-4 hover:text-[#DB4444] transition-colors">
+            <Link
+              to="/signup"
+              className="font-semibold text-foreground underline underline-offset-4 hover:text-[#DB4444] transition-colors"
+            >
               {t('auth.sign_up')}
             </Link>
           </p>
