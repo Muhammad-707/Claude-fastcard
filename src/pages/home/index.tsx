@@ -21,6 +21,87 @@ import { SearchBox } from '@/widgets/header/SearchBox'
 import { Footer } from '@/widgets/footer'
 import { getImageUrl } from '@/shared/lib/image'
 
+import i1 from "@/assets/OIP (1).webp"
+import i5 from "@/assets/aIxOQ91Bds2cET5yhbpcRw__70.jpg"
+import i7 from "@/assets/Samsung-Galaxy-S26-Ultra-CAD-based-render-AH-exclusive-2-1420x799-pic_32ratio_900x600-900x600-41769.jpg"
+import i9 from "@/assets/yddobdqug5n91.webp"
+import i11 from "@/assets/Rolex-Day-Date-18238-_onyx_-_Pinball_.jpg.webp"
+import i12 from "@/assets/men-football-shoes-agility-100-for-turf-black.avif"
+
+/* ─── Custom CSS for 3D Floating Animation ─── */
+const floatStyle = `
+  @keyframes float3D {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-12px) rotate(1deg); }
+  }
+  .animate-float-3d {
+    animation: float3D 5s ease-in-out infinite;
+  }
+`;
+
+/* ─── 3D Tilt Card Component ─── */
+function TiltProductImage({ src, alt }: { src: string; alt: string }) {
+  const [coords, setCoords] = useState({ x: 0, y: 0 })
+  const [isHovered, setIsHovered] = useState(false)
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = e.currentTarget
+    const rect = el.getBoundingClientRect()
+    
+    const x = e.clientX - rect.left - rect.width / 2
+    const y = e.clientY - rect.top - rect.height / 2
+    
+    const rotateX = -(y / (rect.height / 2)) * 15
+    const rotateY = (x / (rect.width / 2)) * 15
+    
+    setCoords({ x: rotateY, y: rotateX })
+  }
+
+  const handleMouseLeave = () => {
+    setIsHovered(false)
+    setCoords({ x: 0, y: 0 })
+  }
+
+  return (
+    <div
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        perspective: '1000px',
+        transformStyle: 'preserve-3d',
+      }}
+      className="relative w-full h-full flex items-center justify-center p-4 animate-float-3d"
+    >
+      <div
+        style={{
+          transform: isHovered
+            ? `rotateY(${coords.x}deg) rotateX(${coords.y}deg) scale(1.05)`
+            : 'rotateY(0deg) rotateX(0deg) scale(1)',
+          transition: isHovered ? 'transform 0.1s ease-out' : 'transform 0.6s ease-out',
+          transformStyle: 'preserve-3d',
+        }}
+        className="relative w-[85%] h-[85%] max-w-[280px] max-h-[220px] md:max-h-[280px] rounded-[1.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-black/40 border border-white/20 flex items-center justify-center group/tilt transition-shadow duration-300 hover:shadow-[0_30px_60px_rgba(0,0,0,0.7)] backdrop-blur-sm"
+      >
+        <div 
+          className="absolute -inset-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),transparent_60%)] opacity-0 group-hover/tilt:opacity-100 transition-opacity duration-300 pointer-events-none"
+          style={{ transform: 'translateZ(10px)' }}
+        />
+        
+        <img
+          src={src}
+          alt={alt}
+          style={{ 
+            transform: 'translateZ(40px)',
+            backfaceVisibility: 'hidden'
+          }}
+          className="w-[90%] h-[90%] object-cover rounded-xl shadow-2xl transition-transform duration-300 ease-out pointer-events-none"
+        />
+      </div>
+    </div>
+  )
+}
+
 /* ─── Countdown Timer ─── */
 function CountdownTimer({ seconds: initial }: { seconds: number }) {
   const [left, setLeft] = useState(initial)
@@ -109,15 +190,169 @@ function CategoryIcon({ name, image }: { name: string; image: string }) {
   )
 }
 
-/* ─── Hero slide visual configs (no text — text lives in i18n) ─── */
+/* ─── Modern Slide configs with localized translations ─── */
 const SLIDE_CONFIGS = [
-  { n: 1, bg: 'from-gray-900 via-gray-800 to-gray-700',       img: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1400&q=85',  cta: '/products' },
-  { n: 2, bg: 'from-blue-950 via-blue-900 to-indigo-900',     img: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1400&q=85',  cta: '/products' },
-  { n: 3, bg: 'from-purple-950 via-purple-900 to-pink-900',   img: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1400&q=85',  cta: '/products' },
-  { n: 4, bg: 'from-emerald-950 via-emerald-900 to-teal-900', img: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=1400&q=85',  cta: '/products' },
-  { n: 5, bg: 'from-orange-950 via-orange-900 to-amber-900',  img: 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1400&q=85',  cta: '/products' },
-  { n: 6, bg: 'from-indigo-950 via-indigo-900 to-violet-950', img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1400&q=85',  cta: '/products' },
-  { n: 7, bg: 'from-rose-950 via-rose-900 to-pink-950',       img: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=1400&q=85',  cta: '/products' },
+  { 
+    n: 1, 
+    bg: 'from-zinc-950 via-zinc-900 to-slate-900',       
+    img: i1,  
+    cta: '/products',
+    translations: {
+      en: {
+        tag: "NEW ARRIVAL",
+        title: "iPhone 18 Pro Max",
+        sub: "The future is here. Titanium White Edition with next-gen AI."
+      },
+      ru: {
+        tag: "НОВИНКА",
+        title: "iPhone 18 Pro Max",
+        sub: "Будущее уже здесь. Версия «Белый титан» с ИИ нового поколения."
+      },
+      tj: {
+        tag: "ВОРИДОТИ НАВ",
+        title: "iPhone 18 Pro Max",
+        sub: "Оянда аллакай дар ин ҷост. Нашри «White Titanium» бо зеҳни сунъии насли нав."
+      }
+    }
+  },
+  { 
+    n: 6, 
+    bg: 'from-[#0d0d0d] via-[#1a1a1a] to-[#262626]', 
+    img: i11,  
+    cta: '/products',
+    translations: {
+      en: {
+        tag: "LIMITED OFFER",
+        title: "Rolex Submariner",
+        sub: "The definition of timeless luxury and absolute precision."
+      },
+      ru: {
+        tag: "ЛИМИТИРОВАННАЯ СЕРИЯ",
+        title: "Rolex Submariner",
+        sub: "Эталон неподвластной времени роскоши и абсолютной точности."
+      },
+      tj: {
+        tag: "ПЕШНИҲОДИ МАҲДУД",
+        title: "Rolex Submariner",
+        sub: "Намунаи боҳашамати безавол ва дақиқии мутлақ."
+      }
+    }
+  },
+  { 
+    n: 2, 
+    bg: 'from-[#0a1128] via-[#1c2541] to-[#3a506b]',     
+    img: i5,  
+    cta: '/products',
+    translations: {
+      en: {
+        tag: "BEST SELLER",
+        title: "MacBook Pro M5",
+        sub: "Ultimate power meets absolute elegance. Silver White Edition."
+      },
+      ru: {
+        tag: "ХИТ ПРОДАЖ",
+        title: "MacBook Pro M5",
+        sub: "Невероятная мощность и абсолютная элегантность в серебристо-белом цвете."
+      },
+      tj: {
+        tag: "ПУРРӮФУРӮШ",
+        title: "MacBook Pro M5",
+        sub: "Қудрати бениҳоят ва зебогии мутлақ дар ранги нуқрагин-сафед."
+      }
+    }
+  },
+  { 
+    n: 3, 
+    bg: 'from-[#1f0322] via-[#3a083c] to-[#610f44]',   
+    img: i12,  
+    cta: '/products',
+    translations: {
+      en: {
+        tag: "FLASH DEAL",
+        title: "Nike Air Max 2026",
+        sub: "Step into 2026. Ultra-light comfort with gravity-defying response."
+      },
+      ru: {
+        tag: "ГОРЯЧЕЕ ПРЕДЛОЖЕНИЕ",
+        title: "Nike Air Max 2026",
+        sub: "Шагните в 2026 год. Сверхлегкая амортизация и невероятный комфорт."
+      },
+      tj: {
+        tag: "ПЕШНИҲОДИ ГАРМ",
+        title: "Nike Air Max 2026",
+        sub: "Ба соли 2026 қадам гузоред. Амортизатсияи сабук ва бароҳатии бениҳоят."
+      }
+    }
+  },
+  { 
+    n: 4, 
+    bg: 'from-slate-950 via-slate-900 to-zinc-900', 
+    img: i7,  
+    cta: '/products',
+    translations: {
+      en: {
+        tag: "HOT DEAL",
+        title: "Galaxy S26 Ultra",
+        sub: "Next-gen 200MP camera and revolutionary holographic screen."
+      },
+      ru: {
+        tag: "СПЕЦПРЕДЛОЖЕНИЕ",
+        title: "Galaxy S26 Ultra",
+        sub: "Камера 200 Мп нового поколения и революционный голографический экран."
+      },
+      tj: {
+        tag: "ПЕШНИҲОДИ МАХСУС",
+        title: "Galaxy S26 Ultra",
+        sub: "Камераи 200 Мп насли нав ва экрани голографии инқилобӣ."
+      }
+    }
+  },
+  { 
+    n: 5, 
+    bg: 'from-[#0b0c10] via-[#1f2833] to-[#2b2b2b]',  
+    img: i9,  
+    cta: '/products',
+    translations: {
+      en: {
+        tag: "GAMING WEEK",
+        title: "Ultimate Gaming Setup",
+        sub: "Unleash maximum performance with liquid-cooled M5 components."
+      },
+      ru: {
+        tag: "ИГРОВАЯ НЕДЕЛЯ",
+        title: "Игровая станция M5",
+        sub: "Раскройте максимум производительности с жидкостным охлаждением."
+      },
+      tj: {
+        tag: "ҲАФТАИ БОЗӢ",
+        title: "Истгоҳи бозии M5",
+        sub: "Баландтарин маҳсулнокиро бо хунуккунии моеъ эҳсос кунед."
+      }
+    }
+  },
+  { 
+    n: 7, 
+    bg: 'from-[#1c0a10] via-[#3d1220] to-[#5a1c30]',       
+    img: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&q=80',  
+    cta: '/products',
+    translations: {
+      en: {
+        tag: "BEAUTY",
+        title: "Premium Fragrances",
+        sub: "Discover exclusive scents from the world's most elite perfume houses."
+      },
+      ru: {
+        tag: "КРАСОТА",
+        title: "Элитная парфюмерия",
+        sub: "Эксклюзивные ароматы от ведущих парфюмерных домов мира."
+      },
+      tj: {
+        tag: "ЗЕБОӢ",
+        title: "Атрҳои элитӣ",
+        sub: "Бӯйҳои эксклюзивӣ аз хонаҳои пешбари атрҳои дунё."
+      }
+    }
+  }
 ] as const
 
 /* ─── Product Swiper Section ─── */
@@ -239,7 +474,8 @@ function NavBtn({ dir, refProp }: { dir: 'prev' | 'next'; refProp: React.RefObje
 /* ════════════════════════════════════════════ */
 export default function HomePage() {
 /* ════════════════════════════════════════════ */
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const currentLang = (i18n.language || 'en') as 'en' | 'ru' | 'tj'
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { list: products, listStatus } = useAppSelector((s) => s.products)
@@ -257,13 +493,16 @@ export default function HomePage() {
     dispatch(fetchCategories())
   }, [dispatch])
 
-  /* ── Translated hero slides ── */
-  const heroSlides = SLIDE_CONFIGS.map((s) => ({
-    ...s,
-    tag:   t(`home.slide${s.n}_tag`),
-    title: t(`home.slide${s.n}_title`),
-    sub:   t(`home.slide${s.n}_sub`),
-  }))
+  /* ── Localized Modern Hero slides ── */
+  const heroSlides = SLIDE_CONFIGS.map((s) => {
+    const translation = s.translations[currentLang] || s.translations['en']
+    return {
+      ...s,
+      tag:   translation.tag,
+      title: translation.title,
+      sub:   translation.sub,
+    }
+  })
 
   /* ── Figma categories — always shown (merged with API if API has results) ── */
   const figmaCategories = [
@@ -282,6 +521,7 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col bg-background min-h-screen">
+      <style dangerouslySetInnerHTML={{ __html: floatStyle }} />
       <Header />
 
       {/* Mobile-only search bar — sits right below the header on small screens */}
@@ -353,27 +593,37 @@ export default function HomePage() {
             >
               {heroSlides.map((slide) => (
                 <SwiperSlide key={slide.n}>
-                  <div className={`relative h-full w-full overflow-hidden bg-gradient-to-br ${slide.bg}`}>
+                  <div className={`relative h-full w-full overflow-hidden bg-gradient-to-br ${slide.bg} flex flex-col md:flex-row items-center`}>
+                    
+                    {/* Текстурный фоновый слой (очень низкая прозрачность, чтобы не мешать контенту) */}
                     <img
                       src={slide.img}
-                      alt={slide.title}
-                      className="absolute inset-0 opacity-30 w-full h-full object-cover mix-blend-luminosity"
+                      alt=""
+                      className="absolute inset-0 opacity-[0.07] w-full h-full object-cover mix-blend-luminosity pointer-events-none"
                     />
-                    <div className="absolute inset-0 flex flex-col justify-center px-10 lg:px-14">
+                    
+                    {/* Левая колонка: Текст */}
+                    <div className="relative z-10 w-full md:w-3/5 flex flex-col justify-center px-8 sm:px-12 lg:px-16 py-8 md:py-0 h-[55%] md:h-full text-left">
                       <span className="inline-block bg-[#DB4444]/90 px-3 py-1 rounded w-fit font-bold text-white text-xs uppercase tracking-widest">
                         {slide.tag}
                       </span>
-                      <h1 className="mt-4 max-w-md font-bold text-white text-4xl lg:text-5xl leading-tight">
+                      <h1 className="mt-3 sm:mt-4 max-w-md font-bold text-white text-3xl sm:text-4xl lg:text-5xl leading-tight">
                         {slide.title}
                       </h1>
-                      <p className="mt-3 max-w-xs text-white/70 text-sm">{slide.sub}</p>
+                      <p className="mt-2 sm:mt-3 max-w-xs text-white/70 text-xs sm:text-sm">{slide.sub}</p>
                       <Link
                         to={slide.cta}
-                        className="inline-flex items-center gap-2 mt-7 pb-0.5 border-white hover:border-[#DB4444] border-b-2 w-fit font-bold text-white hover:text-[#DB4444] text-sm transition-colors"
+                        className="inline-flex items-center gap-2 mt-5 sm:mt-7 pb-0.5 border-white hover:border-[#DB4444] border-b-2 w-fit font-bold text-white hover:text-[#DB4444] text-sm transition-colors"
                       >
                         {t('home.hero_cta')} <ArrowRight className="w-4 h-4" />
                       </Link>
                     </div>
+
+                    {/* Правая колонка: Интерактивный 3D-продукт */}
+                    <div className="relative z-10 w-full md:w-2/5 h-[45%] md:h-full flex items-center justify-center p-2 sm:p-4">
+                      <TiltProductImage src={slide.img} alt={slide.title} />
+                    </div>
+
                   </div>
                 </SwiperSlide>
               ))}

@@ -65,16 +65,16 @@ export default function LoginPage() {
           <p className="mt-2 text-sm text-muted-foreground">{t('auth.login_subtitle')}</p>
 
           <form onSubmit={formik.handleSubmit} className="mt-10 space-y-5" noValidate>
-            {/* Username / Email */}
+            {/* Username */}
             <div className="space-y-1.5">
               <label htmlFor="userName" className="block text-sm font-medium text-foreground">
-                {t('auth.email_phone_label')}
+                {t('auth.username_label', 'Username')}
               </label>
               <Input
                 id="userName"
                 type="text"
                 autoComplete="username"
-                placeholder={t('auth.email_phone_placeholder')}
+                placeholder={t('auth.username_placeholder', 'Enter your username')}
                 className={fieldCls('userName')}
                 {...formik.getFieldProps('userName')}
               />

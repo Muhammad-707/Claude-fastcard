@@ -41,6 +41,7 @@
     "create_account": "Аккаунт сохтан",
     "log_in": "Даромадан",
     "username": "Ном",
+    "username_label": "Номи корбарӣ",
     "password": "Рамз",
     "confirm_password": "Тасдиқи рамз",
     "phone": "Рақами телефон",

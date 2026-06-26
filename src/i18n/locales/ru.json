@@ -41,6 +41,7 @@
     "create_account": "Создать аккаунт",
     "log_in": "Войти",
     "username": "Имя пользователя",
+    "username_label": "Имя пользователя",
     "password": "Пароль",
     "confirm_password": "Подтвердите пароль",
     "phone": "Номер телефона",
