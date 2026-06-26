@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Trash2, ShoppingCart, Heart } from 'lucide-react'
@@ -113,6 +113,15 @@ function WishlistCard({ product, onRemove, onAddToCart }: {
   )
 }
 
+// Безопасное извлечение ID (числа или строки) из стора, даже если там лежит объект
+const getPrimitiveId = (item: any): string | number => {
+  if (item === null || item === undefined) return ''
+  if (typeof item === 'object') {
+    return item.id ?? item.productId ?? item._id ?? ''
+  }
+  return item
+}
+
 /* ════════════════════════════════════════════ */
 export default function WishlistPage() {
 /* ════════════════════════════════════════════ */
@@ -124,6 +133,9 @@ export default function WishlistPage() {
   const storedProducts = useAppSelector(selectWishlistProducts)
   const { list: allProducts, listStatus } = useAppSelector((s) => s.products)
   const isAuth = useAppSelector(selectIsAuth)
+
+  // Реф для предотвращения цикличных обновлений
+  const hasSyncedRef = useRef(false)
 
   useEffect(() => {
     dispatch(fetchProducts({ pageNumber: 1, pageSize: 20 }))
@@ -137,7 +149,13 @@ export default function WishlistPage() {
 
   const wishlistProducts = useMemo<Product[]>(() =>
     wishlistIds
-      .map((id) => storedProducts.find((p) => p.id === id) ?? safeAll.find((p) => p.id === id))
+      .map((item) => {
+        const id = getPrimitiveId(item)
+        return (
+          storedProducts.find((p) => String(p.id) === String(id)) ?? 
+          safeAll.find((p) => String(p.id) === String(id))
+        )
+      })
       .filter((p): p is Product => p !== undefined),
     [wishlistIds, storedProducts, safeAll],
   )
@@ -145,11 +163,20 @@ export default function WishlistPage() {
   /* ── After fetch: migrate legacy IDs and purge orphans ─────────── */
   useEffect(() => {
     if (listStatus !== 'success' || wishlistIds.length === 0) return
+    if (hasSyncedRef.current) return // Выходим, если уже синхронизировали в этой сессии
+
+    hasSyncedRef.current = true
 
     // Persist any products that are now resolved but not yet stored
     const unsynced = wishlistIds
-      .filter((id) => !storedProducts.find((p) => p.id === id))
-      .map((id) => safeAll.find((p) => p.id === id))
+      .filter((item) => {
+        const id = getPrimitiveId(item)
+        return !storedProducts.some((p) => String(p.id) === String(id))
+      })
+      .map((item) => {
+        const id = getPrimitiveId(item)
+        return safeAll.find((p) => String(p.id) === String(id))
+      })
       .filter((p): p is Product => p !== undefined)
 
     if (unsynced.length > 0) {
@@ -157,16 +184,21 @@ export default function WishlistPage() {
     }
 
     // Remove IDs that truly don't exist in the API response (orphan legacy IDs)
-    const orphans = wishlistIds.filter(
-      (id) =>
-        !storedProducts.find((p) => p.id === id) &&
-        !safeAll.find((p) => p.id === id),
-    )
-    orphans.forEach((id) => dispatch(removeWishlist(id)))
+    const orphans = wishlistIds.filter((item) => {
+      const id = getPrimitiveId(item)
+      return (
+        !storedProducts.some((p) => String(p.id) === String(id)) &&
+        !safeAll.some((p) => String(p.id) === String(id))
+      )
+    })
+    
+    if (orphans.length > 0) {
+      orphans.forEach((item) => dispatch(removeWishlist(item)))
+    }
   }, [listStatus, wishlistIds, storedProducts, safeAll, dispatch])
 
   const justForYou = useMemo(
-    () => safeAll.filter((p) => !wishlistIds.includes(p.id)).slice(0, 8),
+    () => safeAll.filter((p) => !wishlistIds.some((item) => String(getPrimitiveId(item)) === String(p.id))).slice(0, 8),
     [safeAll, wishlistIds],
   )
 
@@ -188,7 +220,9 @@ export default function WishlistPage() {
   }
 
   const handleRemove = (id: number) => {
-    dispatch(removeWishlist(id))
+    // Находим точный элемент (объект или примитив) из wishlistIds по его id
+    const exactItem = wishlistIds.find((item) => String(getPrimitiveId(item)) === String(id)) ?? id
+    dispatch(removeWishlist(exactItem))
     toast.info(t('wishlist.removed'))
   }
 
@@ -239,7 +273,7 @@ export default function WishlistPage() {
               {/* Grid — skeleton while loading, real cards when ready */}
               <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
                 {isLoadingProducts && wishlistProducts.length === 0
-                  ? wishlistIds.map((id) => <ProductSkeleton key={id} />)
+                  ? wishlistIds.map((item, index) => <ProductSkeleton key={getPrimitiveId(item) || index} />)
                   : wishlistProducts.map((p) => (
                       <WishlistCard
                         key={p.id}
